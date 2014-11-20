@@ -17,7 +17,7 @@
 #include <vector>
 #include <sstream>
 
-#include <EventContainer.h>
+#include <Event.h>
 
 using namespace std;
 
@@ -29,7 +29,7 @@ class DataReader{
 		~DataReader();
 
 		//Methods
-		virtual std::vector<EventContainer> m_importData();
+		virtual void m_importData(Event* events){};
 		void m_write_txt(std::string outputFile);
 		void m_write_hist(std::string outputFile);
 

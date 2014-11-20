@@ -11,10 +11,13 @@
 #include <DataReader.h>
 #define DEBUG 1
 
-	
+DataReader::DataReader(){}
+
 DataReader::DataReader(std::string arg_filename){
 	filename = arg_filename;
 }
+
+DataReader::~DataReader(){}
 
 //Getters
 unsigned DataReader::get_timestamp(){
