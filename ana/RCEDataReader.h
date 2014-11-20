@@ -12,14 +12,16 @@
 #ifndef RCEDATAREADER_H
 #define RCEDATAREADER_H
 
-class RCEDataReader:protected DataReader{
+#include <DataReader.h>
+
+class RCEDataReader : public DataReader {
 	public: 
 		RCEDataReader();
-		RCEDataReader(std::string arg_filename):DataReader(std::string arg_filename);
+		RCEDataReader(std::string arg_filename);
 		~RCEDataReader();
 
-		//Overloaded methods
-
+		//Inherited methods
+		void m_importData(EventMap* events);		
 };
 
 #endif
