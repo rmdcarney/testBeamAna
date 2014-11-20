@@ -3,9 +3,13 @@
 #include "Event.h"
 #include "RCEDataReader.h"
 
-int main(){
+int main(int argc, char* argv[]){
 
-	std::string filename = "~/Documents/Work_careers/LBNL/data/cosmic_000024_000000.dat";
+	if(argc != 2){
+		std::cout<< "Run like: ./bin/main file_to_be_analysed" <<std::endl;
+		return 1;
+	}
+	std::string filename = argv[1];
 	//Try reading the data
 	RCEDataReader reader(filename);
 

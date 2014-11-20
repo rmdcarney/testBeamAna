@@ -81,7 +81,7 @@ void RCEDataReader::m_importData(EventMap* events ){
 			if(record.isHeader()){
 				link = record.get_link();
 				//For each new link, we add an EventContainer to the EventMap
-				if(events->at(link)==NULL)
+				if(events->find(link)==events->end() )
 					events->at(link) = new EventContainer;
 				//For a new event (i.e. a new trigger), add an event to the EventContainer
 				events->at(link)->push_back(Event(record.get_lv1id()));
