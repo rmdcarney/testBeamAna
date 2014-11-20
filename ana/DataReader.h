@@ -29,7 +29,7 @@ class DataReader{
 		~DataReader();
 
 		//Methods
-		std::vector<EventContainer> m_importData();
+		virtual std::vector<EventContainer> m_importData();
 		void m_write_txt(std::string outputFile);
 		void m_write_hist(std::string outputFile);
 
@@ -54,8 +54,6 @@ class DataReader{
 
 		//Member class, shamelessly lifted from 
 		//Jens Dopke & Matevz Cerv
-		//Also yes, this is ugly but I can't think of better way to define the structs
-		//since we have a rivate nested member var as you always have to declare the private vars and they define on the definition of both a struct and union. If you think of a better way to do this, please do put the definitions in the cpp file!
 		class FormattedRecord{
 			public: 
 				//Record types
