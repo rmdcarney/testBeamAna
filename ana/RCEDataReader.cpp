@@ -11,7 +11,7 @@
 
 #include <RCEDataReader.h>
 
-#define PRINTOUTS 1
+#define PRINTOUTS 0
 
 //Inherit base constructor
 RCEDataReader::RCEDataReader(std::string arg_filename) : DataReader(arg_filename){
@@ -82,7 +82,7 @@ void RCEDataReader::m_importData(EventMap* events ){
 				link = record.get_link();
 				//For each new link, we add an EventContainer to the EventMap
 				if(events->find(link)==events->end() )
-					events->at(link) = new EventContainer;
+					events->insert(std::pair<unsigned,EventContainer*>(link, new EventContainer));
 				//For a new event (i.e. a new trigger), add an event to the EventContainer
 				events->at(link)->push_back(Event(record.get_lv1id()));
 				
