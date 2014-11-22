@@ -16,6 +16,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <list>
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 
@@ -35,7 +36,7 @@ class Event{
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
 
 		//Getters
-		vector<Hit> getHits();
+		std::list<Hit> getHits();
 		int get_nHits();
 		int get_lv1id();
 		int get_chipID();
@@ -52,7 +53,7 @@ class Event{
 		unsigned lv1id;
 		unsigned chipID;
 		unsigned link;
-		std::vector<Hit> hits;
+		std::list<Hit> hits;
 		
 };
 

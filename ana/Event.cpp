@@ -34,7 +34,7 @@ void Event::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 
 //Getters
 
-std::vector<Hit> Event::getHits(){
+std::list<Hit> Event::getHits(){
 	return hits;
 }
 
