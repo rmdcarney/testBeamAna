@@ -29,7 +29,7 @@ class DataReader{
 		~DataReader();
 
 		//Methods
-		virtual void m_importData(Event* events){};
+		virtual void m_importData(Event*){};
 		void m_write_txt(std::string outputFile);
 		void m_write_hist(std::string outputFile);
 
