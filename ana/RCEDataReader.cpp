@@ -83,6 +83,10 @@ void RCEDataReader::m_importData(EventMap* events ){
 				//For each new link, we add an EventContainer to the EventMap
 				if(events->find(link)==events->end() )
 					events->insert(std::pair<unsigned,EventContainer*>(link, new EventContainer));
+				//Check if the previous event had any hits, if it didn't remove it from the container:
+				else if (events->at(link)->back().get_nHits() == 0)
+					events->at(link)->pop_back();
+				
 				//For a new event (i.e. a new trigger), add an event to the EventContainer
 				events->at(link)->push_back(Event(record.get_lv1id()));
 				
