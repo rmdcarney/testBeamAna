@@ -115,6 +115,16 @@ void RCEDataReader::m_importData(EventMap* events ){
 
 			}
 		}
+		
+		EventMap::iterator it;
+
+		std::cout<<"I get this far" << std::endl;
+		for(it = events->begin(); it != events->end(); ++it){
+			if((*it).second != NULL){
+				if((*it).second->back().get_nHits() == 0)
+					(*it).second->pop_back();
+			}
+		}
 		delete fe_data;
 	}
 }

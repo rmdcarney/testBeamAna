@@ -46,22 +46,22 @@ int main(int argc, char* argv[]){
 	unsigned sizeOfHits = 10000000;
 	//for(hitIt = events[0]->at(0).getHits().begin(); hitIt != events[0]->at(0).getHits().end(); ++hitIt){
 	
-	sizeOfHits = events[0]->at(0).get_nHits();
+//	sizeOfHits = events[0]->at(0).get_nHits();
 
 	//Iterate over link 0 and see where there are actually hits!
 //	for(unsigned j=0; j<events[0]->size(); j++)
 //		std::cout<< j << "\t" << events[0]->at(j).get_nHits()<<std::endl;
 	
-//	bcid = events[0]->at(10).getHits().back().get_row();
-//	std::cout<<"bcid: " << bcid <<std::endl;
+	bcid = events[0]->at(12).getHits().back().get_row();
+	std::cout<<"bcid: " << bcid <<std::endl;
 	unsigned a=0;
 //Try and look at the information in one of the hits
-	for(hitIt = events[0]->at(10).getHits().begin(); hitIt != events[0]->at(10).getHits().end(); ++hitIt){
-		std::cout<<a<<std::endl;
-		a++;
+//	for(hitIt = events[0]->at(12).getHits().begin(); hitIt != events[0]->at(12).getHits().end(); ++hitIt){
+//		std::cout<<a<<std::endl;
+//		a++;
 		//bcid = (*hitIt).get_col();//events[0]->at(0).getHits().back().get_tot();
 		//std::cout<<"bcid: " <<bcid<<std::endl;
-	}
+//	}
 
 /*
 	//Check functionality of pop_back
