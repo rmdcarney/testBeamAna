@@ -34,8 +34,12 @@ void Event::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 
 //Getters
 
-std::list<Hit> Event::getHits(){
-	return hits;
+std::list<Hit>::iterator Event::get_firstHit(){
+	return hits.begin();
+}
+
+std::list<Hit>::iterator Event::get_lastHit(){
+	return hits.end();
 }
 
 

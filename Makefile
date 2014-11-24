@@ -5,7 +5,7 @@
 ## variables there. See local.config.sample for an example and a description
 ## of all used variables.
 
-MODE = RELEASE
+MODE = DEBUG
 AR = ar
 
 CPP = g++

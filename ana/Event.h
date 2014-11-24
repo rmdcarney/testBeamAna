@@ -36,7 +36,8 @@ class Event{
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
 
 		//Getters
-		std::list<Hit> getHits();
+		std::list<Hit>::iterator get_firstHit();
+		std::list<Hit>::iterator get_lastHit();
 		int get_nHits();
 		int get_lv1id();
 		int get_chipID();
@@ -57,7 +58,7 @@ class Event{
 		
 };
 
-typedef std::vector<Event> EventContainer;
+typedef std::list<Event> EventContainer;
 typedef std::map<unsigned,EventContainer*> EventMap;
 
 #endif
