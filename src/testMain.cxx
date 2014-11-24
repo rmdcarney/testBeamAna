@@ -26,9 +26,10 @@ int main(int argc, char* argv[]){
 
 	unsigned numHits(0), total(0), numEvents(0);
 	EventMap::iterator i;
+	EventContainer::iterator j;
 	for(i=events.begin(); i!=events.end(); ++i){
-		for(unsigned j=0; j<i->second->size(); j++){
-			numHits += i->second->at(j).get_nHits();
+		for(j=i->second->begin(); j != i->second->end(); ++j){
+			numHits += j->get_nHits();
 		}
 		numEvents += i->second->size();
 		std::cout << i->first << ":\t"
@@ -46,40 +47,28 @@ int main(int argc, char* argv[]){
 	unsigned sizeOfHits = 10000000;
 	//for(hitIt = events[0]->at(0).getHits().begin(); hitIt != events[0]->at(0).getHits().end(); ++hitIt){
 	
-//	sizeOfHits = events[0]->at(0).get_nHits();
-
+//	sizeOfHits = events[0]->front().get_nHits();
+	unsigned counter=0;
 	//Iterate over link 0 and see where there are actually hits!
-//	for(unsigned j=0; j<events[0]->size(); j++)
-//		std::cout<< j << "\t" << events[0]->at(j).get_nHits()<<std::endl;
-	
-	bcid = events[0]->at(12).getHits().back().get_row();
-	std::cout<<"bcid: " << bcid <<std::endl;
+	/*for(j=events[0]->begin(); j!= events[0]->end(); ++j){
+		std::cout<< counter << "\t" << j->get_nHits()<<std::endl;
+		counter++;
+	}
+*///	bcid = events[0]->at(12).getHits().back().get_row();
 	unsigned a=0;
 //Try and look at the information in one of the hits
-//	for(hitIt = events[0]->at(12).getHits().begin(); hitIt != events[0]->at(12).getHits().end(); ++hitIt){
-//		std::cout<<a<<std::endl;
-//		a++;
-		//bcid = (*hitIt).get_col();//events[0]->at(0).getHits().back().get_tot();
-		//std::cout<<"bcid: " <<bcid<<std::endl;
-//	}
-
-/*
-	//Check functionality of pop_back
-	std::vector<int> testArr;
-	testArr.push_back(1);
-	testArr.push_back(2);
-	testArr.push_back(3);
 	
-	for(int i=0; i<testArr.size(); i++)
-	std::cout<<"Vector is: "<<testArr[i] << "\t";
+	j = events[0]->begin();
+	++j;
+	++j;
+	++j;
 
-	testArr.pop_back();
-	std::cout<<""<<std::endl;
+	//Check the access is working (tick!)
+	for(hitIt = j->get_firstHit(); hitIt != j->get_lastHit(); ++hitIt){
+		std::cout<<a<<" ";
+		a++;
+		bcid = (*hitIt).get_tot();//events[0]->at(0).getHits().back().get_tot();
+		std::cout<<"bcid: " <<bcid<<std::endl;
+	}
 
-	for(int i=0; i<testArr.size(); i++)
-	std::cout<<"Vector is: "<<testArr[i] << "\t";
-*/	
-	
-
-	
 }
