@@ -83,10 +83,10 @@ void RCEDataReader::m_importData(EventMap* events ){
 				//For each new link, we add an EventContainer to the EventMap
 				if(events->find(link)==events->end() )
 					events->insert(std::pair<unsigned,EventContainer*>(link, new EventContainer));
-				//Check if the previous event had any hits, if it didn't remove it from the container:
-				else if (events->at(link)->back().get_nHits() == 0)
+	
+				else if(events->at(link)->back().get_nHits() == 0)
 					events->at(link)->pop_back();
-				
+
 				//For a new event (i.e. a new trigger), add an event to the EventContainer
 				events->at(link)->push_back(Event(record.get_lv1id()));
 				
@@ -115,17 +115,17 @@ void RCEDataReader::m_importData(EventMap* events ){
 
 			}
 		}
-		
-		EventMap::iterator it;
-
-		std::cout<<"I get this far" << std::endl;
-		for(it = events->begin(); it != events->end(); ++it){
-			if((*it).second != NULL){
-				if((*it).second->back().get_nHits() == 0)
-					(*it).second->pop_back();
+/*		
+		EventMap::iterator i;
+		EventContainer::iterator j;
+		for(i = events->begin(); i != events->end(); ++i){
+			for(j = i->second->begin(); j!= i->second->end(); ++j){
+				if( j->get_nHits() == 0)
+					std::cout<<"This container had no hits!" <<std::endl;
+					//i->second->erase(j);
 			}
 		}
-		delete fe_data;
+*/		delete fe_data;
 	}
 }
 
