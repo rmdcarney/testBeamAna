@@ -27,8 +27,8 @@ using namespace std;
 
 namespace Algorithm{
 
-	void findClusters(ClusterContainer* clusters, EventMap* events);
-
+	void findClusters(ClusterContainer* clusters, EventMap events);
+	int sgn(int val, int limit);
 }
 
 #endif
