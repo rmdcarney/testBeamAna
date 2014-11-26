@@ -32,6 +32,10 @@ void Event::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 	hits.push_back(Hit(bcid, col, row, tot));
 }
 
+void Event::eraseHit(std::list<Hit>::iterator it){
+	hits.erase(it);
+}
+
 //Getters
 
 std::list<Hit>::iterator Event::get_firstHit(){
