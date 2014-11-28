@@ -31,8 +31,10 @@ void Cluster::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 void Cluster::findToT(){
 	std::list<Hit>::iterator i;
 	tot = 0;
+	if(!hits.empty()){
 	for(i=hits.begin(); i!=hits.end(); ++i)
 		tot += i->get_tot();
+	}
 }
 
 //Getters
