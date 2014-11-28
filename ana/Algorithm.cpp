@@ -9,21 +9,103 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #include <Algorithm.h>
+
 #define DEBUG 1
+
 #define clusterMin 1
+#define colLimit 1
+#define rowLimit 2
+#define bcidLimit 1
+
+#define nRows 336
+#define nCols 80
+
+#define nRepeatedTriggers 16
 
 int Algorithm::sgn(int val, int limit){
 	return ((limit  < val) - (val < limit));
 }
 
+void Algorithm::resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bcidSet){
+
+	switch(sgn(bcid, *bcidHigh)){
+		case 1:
+			std::cout<<"ERROR: in boundary conditions bcidHigh" 
+				<<std::endl;
+			return;
+
+		case 0: 
+			//bc = upper limit, set lower limit to 1 less
+			*bcidLow -= bcidLimit;
+			*bcidSet = true;
+			break;
+
+		case -1:
+			//Could be same bc or 1 less, do nothing
+			switch(sgn(bcid, *bcidLow)){
+				case 1:
+					//bcid is same as in other hit
+					break;
+				case 0: 
+					//bcid = lower limit, set upper limit to 1 more
+					*bcidHigh += bcidLimit;
+					*bcidSet = true;
+					break;
+				case -1:
+					std::cout<<"ERROR: in boundary condition bcidHigh"
+						<<std::endl;
+					return;
+			}
+			break;
+	}
+
+}
+
+void Algorithm::resetXYLimits(int colOrRow, int* colOrRowHigh, int* colOrRowLow, char cOrR){
+
+	switch(sgn(colOrRow, *colOrRowHigh)){
+		case 1: 
+			std::cout<<"ERROR: in boundary condition rowHigh"
+				<<std::endl;
+			return;
+		case 0:
+			//Row has same value as upper limit, set new upper limit
+			if(cOrR == 'c'){
+			*colOrRowHigh += colLimit;
+			}
+			else if(cOrR == 'r'){
+				*colOrRowHigh += rowLimit;
+			}
+			break;
+		case -1:
+			//Must be lower, try the lowerbound
+			switch(sgn(colOrRow, *colOrRowLow)){
+				case 1: 
+					//In bounds, do nothing
+					break;
+				case 0:
+					if(cOrR == 'r'){
+					//Row has same value of lower bound, set new lower limit
+					*colOrRowLow -= rowLimit;
+					}
+					else if (cOrR == 'c'){
+						*colOrRowLow -= colLimit;
+					}
+					break;
+
+				case -1:
+					std::cout<<"ERROR: in boundary condition bcidLow"
+						<<std::endl;
+					return;
+			}
+			break;
+	}
+
+}
+
 //TODO: DRAFT ONLY, for short direction
 //We're going to modify the events in the algorithm so take a copy of the data
 void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
-
-	//Boundary limits for clusters
-	int colLimit=1;
-	int rowLimit=2;
-	int bcidLimit=1;
 
 
 	//Make some iterators
@@ -51,7 +133,6 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 				for(j = i->get_firstHit(); j != i->get_lastHit(); ++j){
 
 					//Inner loop will reduce in size as stuff is removed (TODO)
-					k = i->get_firstHit();
 					for(k = i->get_firstHit(); k != i->get_lastHit();  ++k){
 
 						if(k == i->get_firstHit()){
@@ -64,6 +145,24 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 							rowLow = rowHigh-2*rowLimit;
 							bcidHigh = (int)k->get_bcid()+bcidLimit;
 							bcidLow = bcidHigh-2*bcidLimit;
+
+							//Boundary checks
+							if(colHigh > nCols)
+								colHigh = nCols;
+							if(colLow < 1)
+								colLow = 1;
+							if(rowHigh > nRows)
+								rowHigh = nRows;
+							if(rowLow < 1)
+								rowLow = 1;
+							if(bcid < 0){
+								std::cout<<"ERROR: bcid <0"<<std::endl;
+								return;
+							}
+							if(bcid > nRepeatedTriggers){
+								std::cout<<"ERROR: bcid out of range"<<std::endl;
+								return;
+							}
 
 							//Add a new cluster to the container
 							clusters->push_back(Cluster());
@@ -83,72 +182,22 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 									//(1) Reset limits based on new hit
 									//(a) bcid limits change only once
 									if(!bcidSet){
+										
 										//bcid limit is set per cluster - NB this is designed assuming bcid = +-1
-										switch(sgn(bcid, bcidHigh)){
-											case 1:
-												std::cout<<"ERROR: in boundary conditions bcidHigh" 
-													<<std::endl;
-												return;
-
-											case 0: 
-												//bc = upper limit, set lower limit to 1 less
-												bcidLow -= bcidLimit;
-												bcidSet = true;
-												break;
-
-											case -1:
-												//Could be same bc or 1 less, do nothing
-												switch(sgn(bcid, bcidLow)){
-													case 1:
-														//bcid is same as in other hit
-														break;
-													case 0: 
-														//bcid = lower limit, set upper limit to 1 more
-														bcidHigh += bcidLimit;
-														bcidSet = true;
-														break;
-													case -1:
-														std::cout<<"ERROR: in boundary condition bcidHigh"
-															<<std::endl;
-														return;
-												}
-												break;
-										}
-
+										resetBcidLimits(bcid, &bcidHigh, &bcidLow, &bcidSet);
 									}
 									//(b) Row limits extend for length of cluster
-									switch(sgn(row, rowHigh)){
-										case 1: 
-											std::cout<<"ERROR: in boundary condition rowHigh"
-												<<std::endl;
-											return;
-										case 0:
-											//Row has same value as upper limit, set new upper limit
-											rowHigh += rowLimit;
-											break;
-										case -1:
-											//Must be lower, try the lowerbound
-											switch(sgn(row, rowLow)){
-												case 1: 
-													//In bounds, do nothing
-													break;
-												case 0:
-													//Row has same value of lower bound, set new lower limit
-													rowLow -= rowLimit;
-													break;
-												case -1:
-													std::cout<<"ERROR: in boundary condition bcidLow"
-														<<std::endl;
-													return;
-											}
-											break;
-									}
-
+									resetXYLimits(row, &rowHigh, &rowLow, 'r');
+									
 									//With the limits set, add the hit to the cluster
 									clusters->back().addHit(k->get_bcid(), k->get_col(), k->get_row(), k->get_tot());
 
 									//Remove hit from event
-									i->eraseHit(k);
+									if(&(*k) == &(*j))
+									j = i->eraseHit(k++);
+									else{
+										i->eraseHit(k++);
+									}
 								}
 							}
 						}
@@ -158,7 +207,13 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 					if(clusters->back().get_size() == 0)
 						clusters->pop_back();
 					else{
-						i->eraseHit(j);
+						//Check if both iterators are pointing at the element to 
+						//be erased. If it is then increment both.
+						if(&(*k) == &(*j))
+						k = i->eraseHit(j);
+						else{
+							i->eraseHit(j);
+						}
 					}
 				}
 			}

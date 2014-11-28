@@ -29,6 +29,8 @@ namespace Algorithm{
 
 	void findClusters(ClusterContainer* clusters, EventMap events);
 	int sgn(int val, int limit);
+	void resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bcidSet);
+	void resetXYLimits(int colOrRow, int* colOrRowHigh, int* colOrRowLow, char cOrr); 
 }
 
 #endif
