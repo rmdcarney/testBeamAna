@@ -34,7 +34,7 @@ class Event{
 		//Methods
 		void addHit(Hit arg_hits);
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
-		void eraseHit(std::list<Hit>::iterator it);
+		std::list<Hit>::iterator eraseHit(std::list<Hit>::iterator it);
 
 		//Getters
 		std::list<Hit>::iterator get_firstHit();
