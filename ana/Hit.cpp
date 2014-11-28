@@ -16,14 +16,14 @@ Hit::Hit() {
 	col=0;
 	row=0;
 	tot=-1;
-
+	tot_overflow = false;
 }
 
 Hit::Hit(int arg_bcid, int arg_col, int arg_row, int arg_tot){
 	bcid = arg_bcid;
 	col = arg_col;
 	row = arg_row;
-	tot = arg_tot;
+	set_tot(arg_tot);
 }
 
 //Getters
@@ -59,6 +59,15 @@ void Hit::set_row(int arg_row){
 }
 
 void Hit::set_tot(int arg_tot){
-	tot = arg_tot;
+	if(arg_tot > 0){
+		if(arg_tot < 14){
+			tot = arg_tot;
+		} else {
+			tot_overflow = true;
+		}
+	} else {
+		std::cout<<"ERROR: ToT < 1"
+			<<std::endl;
+	}
 }
 

@@ -50,7 +50,7 @@ class Hit{
 		int col;
 		int row;
 		int tot;
-
+		bool tot_overflow;
 		//TODO std::vector<Hit> hits;
 		
 };
