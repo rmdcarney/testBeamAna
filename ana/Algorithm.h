@@ -27,10 +27,11 @@ using namespace std;
 
 namespace Algorithm{
 
-	void findClusters(ClusterContainer* clusters, EventMap events);
+	void findClusters_iterative(ClusterMap* clusters, EventMap events);
 	int sgn(int val, int limit);
 	void resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bcidSet);
-	void resetXYLimits(int colOrRow, int* colOrRowHigh, int* colOrRowLow, char cOrr); 
+	void resetRowLimits(int row, int* rowHigh, int* rowLow); 
+	void resetColLimits(int col, int* colHigh, int* colLow); 
 }
 
 #endif
