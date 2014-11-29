@@ -38,7 +38,7 @@ class Event{
 
 		//Getters
 		std::list<Hit>::iterator get_firstHit();
-		std::list<Hit>::iterator get_lastHit();
+		std::list<Hit>::iterator get_endOfHits();
 		int get_nHits();
 		int get_lv1id();
 		int get_chipID();

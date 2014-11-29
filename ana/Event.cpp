@@ -42,10 +42,9 @@ std::list<Hit>::iterator Event::get_firstHit(){
 	return hits.begin();
 }
 
-std::list<Hit>::iterator Event::get_lastHit(){
+std::list<Hit>::iterator Event::get_endOfHits(){
 	return hits.end();
 }
-
 
 int Event::get_nHits(){
 	return hits.size();
