@@ -64,9 +64,10 @@ void Hit::set_tot(int arg_tot){
 			tot = arg_tot;
 		} else {
 			tot_overflow = true;
+			tot = 14;
 		}
 	} else {
-		std::cout<<"ERROR: ToT < 1"
+		std::cout<<"\nERROR: ToT = "<<arg_tot
 			<<std::endl;
 	}
 }
