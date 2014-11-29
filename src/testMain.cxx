@@ -11,12 +11,16 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	std::string filename = argv[1];
+
 	//Try reading the data
-	
 	RCEDataReader reader(filename);
 
+	unsigned numHits(0), total(0), numEvents(0);
 	EventMap events;
 	ClusterMap clusters;
+	EventMap::iterator i;
+	EventContainer::iterator j;
+	ClusterMap::iterator k;
 
 	//Import the data into the map. Check to see if PRINTOUTS = 1 or not. 
 	std::cout<<"Starting..."<<std::endl;
@@ -31,10 +35,6 @@ int main(int argc, char* argv[]){
 	
 	std::cout<<"*Link*\t*# of hits*" << std::endl;
 	
-	unsigned numHits(0), total(0), numEvents(0);
-	EventMap::iterator i;
-	EventContainer::iterator j;
-
 	for(i=events.begin(); i!=events.end(); ++i){
 		for(j=i->second->begin(); j != i->second->end(); ++j){
 			numHits += j->get_nHits();
@@ -54,6 +54,14 @@ int main(int argc, char* argv[]){
 		clusters.insert(std::pair<unsigned,ClusterContainer*>(i->first, new ClusterContainer));
 	}
 
+	//Make clusters
 	Algorithm::findClusters_iterative(&clusters, events);
+	
+	//Clean up
+	for(i=events.begin(); i != events.end(); ++i)
+		delete i->second;
 
+	for(k=clusters.begin(); k != clusters.end(); ++k)
+		delete k->second;
+	
 }
