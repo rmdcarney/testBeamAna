@@ -10,9 +10,10 @@
 
 #include <Algorithm.h>
 
-#define DEBUG 1
+#define DEBUG 0
+#define PRINTOUTS 0
 
-#define clusterMin 1
+#define clusterMin 0
 #define colLimit 1
 #define rowLimit 2
 #define bcidLimit 1
@@ -35,9 +36,12 @@ void Algorithm::resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bci
 			return;
 
 		case 0: 
-			//bc = upper limit, set lower limit to 1 less
-			*bcidLow -= bcidLimit;
-			*bcidSet = true;
+			//bc = upper limit, set lower limit to 1 more
+			if(bcid != 0){
+				if(*bcidLow + bcidLimit <= nRepeatedTriggers)
+					*bcidLow += bcidLimit;
+				*bcidSet = true;
+			}
 			break;
 
 		case -1:
@@ -47,8 +51,10 @@ void Algorithm::resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bci
 					//bcid is same as in other hit
 					break;
 				case 0: 
-					//bcid = lower limit, set upper limit to 1 more
-					*bcidHigh += bcidLimit;
+					//bcid = lower limit, set upper limit to 1 less
+					if(*bcidHigh != nRepeatedTriggers && (*bcidHigh-bcidLimit) != *bcidLow){
+						*bcidHigh -= bcidLimit;
+					}
 					*bcidSet = true;
 					break;
 				case -1:
@@ -61,40 +67,39 @@ void Algorithm::resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bci
 
 }
 
-void Algorithm::resetXYLimits(int colOrRow, int* colOrRowHigh, int* colOrRowLow, char cOrR){
+void Algorithm::resetRowLimits(int row, int* rowHigh, int* rowLow){
 
-	switch(sgn(colOrRow, *colOrRowHigh)){
+int rowDiff = -1;
+	switch(sgn(row, *rowHigh)){
 		case 1: 
-			std::cout<<"ERROR: in boundary condition rowHigh"
+			std::cout<<"ERROR: in boundary condition row High"
 				<<std::endl;
 			return;
 		case 0:
 			//Row has same value as upper limit, set new upper limit
-			if(cOrR == 'c'){
-			*colOrRowHigh += colLimit;
-			}
-			else if(cOrR == 'r'){
-				*colOrRowHigh += rowLimit;
-			}
+			*rowHigh += rowLimit;
 			break;
 		case -1:
 			//Must be lower, try the lowerbound
-			switch(sgn(colOrRow, *colOrRowLow)){
+			switch(sgn(row, *rowLow)){
 				case 1: 
-					//In bounds, do nothing
+					//See which bound it is closer to
+					if(abs(row - *rowLow) > abs(row - *rowHigh)){
+						rowDiff = *rowHigh - row; 
+						if(rowDiff <= rowLimit)		//Closer to upper limit
+							*rowHigh = row+colLimit;
+					} else if(abs(row - *rowLow) < abs(row - *rowHigh)) { //closer to lower limit
+						rowDiff = row - *rowLow;
+						if(rowDiff <= rowLimit)
+							*rowLow = row- rowLimit;
+					}
 					break;
 				case 0:
-					if(cOrR == 'r'){
-					//Row has same value of lower bound, set new lower limit
-					*colOrRowLow -= rowLimit;
-					}
-					else if (cOrR == 'c'){
-						*colOrRowLow -= colLimit;
-					}
+					*rowLow -= rowLimit;
 					break;
 
 				case -1:
-					std::cout<<"ERROR: in boundary condition bcidLow"
+					std::cout<<"ERROR: in boundary condition row/colLow"
 						<<std::endl;
 					return;
 			}
@@ -103,13 +108,53 @@ void Algorithm::resetXYLimits(int colOrRow, int* colOrRowHigh, int* colOrRowLow,
 
 }
 
+void Algorithm::resetColLimits(int col, int* colHigh, int* colLow){
+
+int colDiff = -1;
+	switch(sgn(col, *colHigh)){
+		case 1: 
+			std::cout<<"ERROR: in boundary condition col High"
+				<<std::endl;
+			return;
+		case 0:
+			//Row has same value as upper limit, set new upper limit
+			*colHigh += colLimit;
+			break;
+		case -1:
+			//Must be lower, try the lowerbound
+			switch(sgn(col, *colLow)){
+				case 1: 
+					//See which bound it is closer to
+					if(abs(col - *colLow) > abs(col - *colHigh)){
+						colDiff = *colHigh - col; 
+						if(colDiff <= colLimit)		//Closer to upper limit
+							*colHigh = col+colLimit;
+					} else if(abs(col - *colLow) < abs(col - *colHigh)) { //closer to lower limit
+						colDiff = col - *colLow;
+						if(colDiff <= colLimit)
+							*colLow = col- colLimit;
+					}
+					break;
+				case 0:
+					*colLow -= colLimit;
+					break;
+
+				case -1:
+					std::cout<<"ERROR: in boundary condition colLow"
+						<<std::endl;
+					return;
+			}
+			break;
+	}
+
+}
 //TODO: DRAFT ONLY, for short direction
 //We're going to modify the events in the algorithm so take a copy of the data
-void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
+void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 
 
 	//Make some iterators
-	ClusterContainer::iterator cit;
+	ClusterMap::iterator cit;
 	EventMap::iterator mit;
 	EventContainer::iterator i;
 	std::list<Hit>::iterator j,k;
@@ -118,27 +163,57 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 	int colHigh(-1), colLow(-1), 
 	    rowHigh(-1), rowLow(-1),
 	    bcidHigh(-1), bcidLow(-1);
-	int col(-1),row(-1),bcid(-1);
+	int col(-1),row(-1),bcid(-1),tot(-1);
 
 	bool bcidSet = false;
 
-	//Iterate over each link, event
-	for(mit = events.begin(); mit != events.end(); ++mit){
-		for(i = mit->second->begin(); i != mit->second->end(); ++i){
+	//Iterate over each link, event TODO; get rid of second condition
+	for(mit = events.begin(); mit !=events.end(); ++mit){
+		if(DEBUG){
+			std::cout<<"================================"<<std::endl;
+			std::cout<<"Starting new loop over link "<<mit->first<<std::endl;
+			std::cout<<"================================"<<std::endl;
+		}
 
-			//In each event, look for clusters
-			//Make sure there are multiple hits 
-			if(i->get_nHits() > clusterMin){
-				//iterate over the hits
-				for(j = i->get_firstHit(); j != i->get_lastHit(); ++j){
+		//Switch into the correct link for the cluster too
+		if(clusters->find(mit->first)== clusters->end() )
+			clusters->insert(std::pair<unsigned,ClusterContainer*>(mit->first, new ClusterContainer));
+		cit = clusters->find(mit->first);
 
+
+		int counter1 =0;
+
+	for(i = mit->second->begin(); i!= mit->second->end(); ++i){
+		if(DEBUG)
+			std::cout<<"\n&&&&&&&& N E W    E V E N T &&&&&&&&&&&\n"<<std::endl;
+			//Cluster all the hits!
+			while(i->get_nHits() > 0){
+				//In each event, look for clusters
+				//Make sure there are multiple hits 
+				if(i->get_nHits() > clusterMin){
+					//iterate over the hits
+
+					if(DEBUG)
+						std::cout<<"\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+							<<"The number of hits in this event are: "<<
+							i->get_nHits()<<" at place " <<counter1<<"\n" << std::endl;
+
+					//TODO just a quick first go
+					j= i->get_firstHit();
+					bcidSet = false;
+
+					int counter =0;
+					if(DEBUG)
+						std::cout<<"\n------------- Hit loop ----------------" <<std::endl;
 					//Inner loop will reduce in size as stuff is removed (TODO)
-					for(k = i->get_firstHit(); k != i->get_lastHit();  ++k){
+					for(k = i->get_firstHit(); k != i->get_endOfHits();  ++k){
 
-						if(k == i->get_firstHit()){
 
+						if(counter==0){
+							if(DEBUG)
+								std::cout<<"\niteration: "<<counter<<std::endl;
 							//Get variables from first hit
-							//TODO boundary checks
+							//Boundary checks
 							colHigh =(int)k->get_col()+colLimit;
 							colLow = colHigh-2*colLimit;
 							rowHigh = (int)k->get_row()+rowLimit;
@@ -146,15 +221,35 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 							bcidHigh = (int)k->get_bcid()+bcidLimit;
 							bcidLow = bcidHigh-2*bcidLimit;
 
+							//Vars
+							bcid = k->get_bcid();
+							col = k->get_col();
+							row = k->get_row();
+							tot = k->get_tot();
+
+							//Check assigned values
+							if(DEBUG){
+								std::cout<<"First hit ....." <<std::endl;
+								std::cout<<"\nbcid: " <<bcid
+									<<"\ncol: " <<col
+									<<"\nrow: "<<row
+									<<"\ntot: "<<tot
+									<<"\ncolHigh: " <<colHigh <<", colLow: " <<colLow
+									<<"\nrowHigh: "<<rowHigh<<", rowLow: " <<rowLow
+									<<"\nbcidHigh: "<<bcidHigh<<", bcidLow: " <<bcidLow
+									<<std::endl;
+							}
+
+
 							//Boundary checks
 							if(colHigh > nCols)
 								colHigh = nCols;
-							if(colLow < 1)
-								colLow = 1;
+							if(colLow < 0)
+								colLow = 0;
 							if(rowHigh > nRows)
 								rowHigh = nRows;
-							if(rowLow < 1)
-								rowLow = 1;
+							if(rowLow < 0)
+								rowLow = 0;
 							if(bcid < 0){
 								std::cout<<"ERROR: bcid <0"<<std::endl;
 								return;
@@ -163,14 +258,50 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 								std::cout<<"ERROR: bcid out of range"<<std::endl;
 								return;
 							}
+							if(bcidHigh > nRepeatedTriggers){
+								bcidHigh = nRepeatedTriggers;
+							}
+							if(bcidLow < 0){
+								bcidLow = 0;
+							}
 
+
+							//Check assigned values after boundary checks
+							if(DEBUG){
+								std::cout<<"Assigned values after boundary checks:" <<std::endl;
+								std::cout<<"colHigh: " <<colHigh <<", colLow: " <<colLow
+									<<"\nrowHigh: "<<rowHigh<<", rowLow: " <<rowLow
+									<<"\nbcidHigh: "<<bcidHigh<<", bcidLow: " <<bcidLow
+									<<std::endl;
+							}
 							//Add a new cluster to the container
-							clusters->push_back(Cluster());
-							clusters->back().addHit(k->get_bcid(), k->get_col(), k->get_row(), k->get_tot());
+							cit->second->push_back(Cluster());
+							cit->second->back().addHit(bcid, col, row, tot);
 
+
+							//Remove hit from event and increment by 1.
+							k = i->eraseHit(k);
 							//Now we have added this hit to the cluster we can increment the iterator. 
 							//Don't delete it from the event data yet because it might not be a real cluster
-							++k;
+							counter++;
+							//Finally, if this was a 1-hit event, break.
+							if(i->get_nHits() == 0)
+								break;
+						}
+						if(PRINTOUTS)
+						std::cout<<"\nIteration: "<<counter<<std::endl;
+						//Get vars from hit
+						bcid = k->get_bcid();
+						col = k->get_col();
+						row = k->get_row();
+						tot = k->get_tot();
+
+						if(DEBUG){
+							std::cout<<"\nNext HIT *****" <<std::endl;
+							std::cout<<"bcid: " <<bcid
+								<<"\ncol: " <<col
+								<<"\nrow: " <<row
+								<<"\ntot: " <<tot <<std::endl;
 						}
 
 						//Check to see if the current hit fits the boundary conditions
@@ -179,43 +310,169 @@ void Algorithm::findClusters(ClusterContainer* clusters, EventMap events){
 								if(bcid <= bcidHigh && bcid >= bcidLow){
 
 									//If inside here, the hit fits the criteria to be a cluster
+									if(DEBUG)
+										std::cout<<"This hit fits the boundary conditions" << std::endl;
+
 									//(1) Reset limits based on new hit
 									//(a) bcid limits change only once
+									if(DEBUG)
+										std::cout<<"bcidLimits before: ("<< bcidHigh << " , " <<bcidLow
+											<<"): limitSet = " <<bcidSet<<std::endl;
+
 									if(!bcidSet){
-										
+
 										//bcid limit is set per cluster - NB this is designed assuming bcid = +-1
 										resetBcidLimits(bcid, &bcidHigh, &bcidLow, &bcidSet);
 									}
-									//(b) Row limits extend for length of cluster
-									resetXYLimits(row, &rowHigh, &rowLow, 'r');
-									
-									//With the limits set, add the hit to the cluster
-									clusters->back().addHit(k->get_bcid(), k->get_col(), k->get_row(), k->get_tot());
 
-									//Remove hit from event
-									if(&(*k) == &(*j))
-									j = i->eraseHit(k++);
-									else{
-										i->eraseHit(k++);
-									}
+									if(DEBUG)
+										std::cout<<"bcidLimits after: ("<< bcidHigh << " , " <<bcidLow
+											<<"): limitSet = " <<bcidSet<<std::endl;
+
+									//(b) Row limits extend for length of cluster
+
+									if(DEBUG)
+										std::cout<<"rowLimits before: ("<< rowHigh << " , " <<rowLow
+											<<")"<<std::endl;
+									resetRowLimits(row, &rowHigh, &rowLow);
+
+
+									if(DEBUG)
+										std::cout<<"rowLimits after: ("<< rowHigh << " , " <<rowLow
+											<<")"<<std::endl;
+
+									//(b) Col limits extend for length of cluster
+
+									if(DEBUG)
+										std::cout<<"colLimits before: ("<< colHigh << " , " <<colLow
+											<<")"<<std::endl;
+									resetColLimits(col, &colHigh, &colLow);
+
+
+									if(DEBUG)
+										std::cout<<"colLimits after: ("<< colHigh << " , " <<colLow
+											<<")"<<std::endl;
+									//With the limits set, add the hit to the cluster
+									cit->second->back().addHit(k->get_bcid(), k->get_col(), k->get_row(), k->get_tot());
+
+									//Remove hit from event, iterator safe
+									k = i->eraseHit(k);
+									k--;
+									if(DEBUG)
+										std::cout<<"\nThe number of hits remaining in this event are: "
+											<< i->get_nHits() <<std::endl;
 								}
 							}
 						}
+						counter++;
 					}
 					//If there were no hits for this cluster remove cluster, 
 					//else remove first hit from event
-					if(clusters->back().get_size() == 0)
-						clusters->pop_back();
-					else{
-						//Check if both iterators are pointing at the element to 
-						//be erased. If it is then increment both.
-						if(&(*k) == &(*j))
-						k = i->eraseHit(j);
-						else{
-							i->eraseHit(j);
+					if(cit->second->back().get_size() > 1 && i->get_nHits()>0){
+						//iterate through the list again to check that no hits were missed
+						//with the final bounds
+						//While there are still hits in the event
+
+						int clusterSizeOld = cit->second->back().get_size();
+						int clusterSizeNew = 0;
+
+						while(i->get_nHits()>0){
+
+							if(DEBUG){
+								std::cout<<"Iterated through event. Now cross-checking hits with current cluster"<<std::endl;
+								counter = 0;
+							}
+							//If no new hits have been added to the cluster, we have them all
+							if(clusterSizeOld == clusterSizeNew)
+								break;
+
+							clusterSizeOld = clusterSizeNew;
+
+							for(k = i->get_firstHit(); k != i->get_endOfHits(); ++k){
+
+								//Get vars from hit
+								bcid = k->get_bcid();
+								col = k->get_col();
+								row = k->get_row();
+								tot = k->get_tot();
+
+								if(DEBUG){
+									std::cout<<"\nNext HIT *****" <<std::endl;
+									std::cout<<"bcid: " <<bcid
+										<<"\ncol: " <<col
+										<<"\nrow: " <<row
+										<<"\ntot: " <<tot <<std::endl;
+								}
+
+								//Check to see if the current hit fits the boundary conditions
+								if(col <= colHigh && col >= colLow){
+									if(row <= rowHigh && row >= rowLow){
+										if(bcid <= bcidHigh && bcid >= bcidLow){
+
+											//If inside here, the hit fits the criteria to be a cluster
+											if(DEBUG)
+												std::cout<<"This hit fits the boundary conditions" << std::endl;
+
+											//(1) Reset limits based on new hit
+											//(a) bcid limits change only once
+											if(DEBUG)
+												std::cout<<"bcidLimits before: ("<< bcidHigh << " , " <<bcidLow
+													<<"): limitSet = " <<bcidSet<<std::endl;
+
+											if(!bcidSet){
+
+												//bcid limit is set per cluster - NB this is designed assuming bcid = +-1
+												resetBcidLimits(bcid, &bcidHigh, &bcidLow, &bcidSet);
+											}
+
+											if(DEBUG)
+												std::cout<<"bcidLimits after: ("<< bcidHigh << " , " <<bcidLow
+													<<"): limitSet = " <<bcidSet<<std::endl;
+
+
+											//(b) Row limits extend for length of cluster
+
+											if(DEBUG)
+												std::cout<<"rowLimits before: ("<< rowHigh << " , " <<rowLow
+													<<")"<<std::endl;
+											resetRowLimits(row, &rowHigh, &rowLow);
+
+
+											if(DEBUG)
+												std::cout<<"rowLimits after: ("<< rowHigh << " , " <<rowLow
+													<<")"<<std::endl;
+
+											//(b) Col limits extend for length of cluster
+
+											if(DEBUG)
+												std::cout<<"colLimits before: ("<< colHigh << " , " <<colLow
+													<<")"<<std::endl;
+											resetColLimits(col, &colHigh, &colLow);
+
+
+											if(DEBUG)
+												std::cout<<"colLimits after: ("<< colHigh << " , " <<colLow
+													<<")"<<std::endl;
+											//With the limits set, add the hit to the cluster
+											cit->second->back().addHit(k->get_bcid(), k->get_col(), k->get_row(), k->get_tot());
+
+											//Remove hit from event - iterator safe
+											k = i->eraseHit(k);
+											k--;
+										}
+									}
+								}
+
+							} //for loop
+
+							clusterSizeNew = cit->second->back().get_size(); 
+
 						}
 					}
+
 				}
+
+				counter1++;
 			}
 		}
 	}
