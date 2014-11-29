@@ -69,7 +69,7 @@ void Algorithm::resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bci
 
 void Algorithm::resetRowLimits(int row, int* rowHigh, int* rowLow){
 
-int rowDiff = -1;
+	int rowDiff = -1;
 	switch(sgn(row, *rowHigh)){
 		case 1: 
 			std::cout<<"ERROR: in boundary condition row High"
@@ -110,7 +110,7 @@ int rowDiff = -1;
 
 void Algorithm::resetColLimits(int col, int* colHigh, int* colLow){
 
-int colDiff = -1;
+	int colDiff = -1;
 	switch(sgn(col, *colHigh)){
 		case 1: 
 			std::cout<<"ERROR: in boundary condition col High"
@@ -148,7 +148,73 @@ int colDiff = -1;
 	}
 
 }
-//TODO: DRAFT ONLY, for short direction
+
+
+void Algorithm::checkHitFitsBoundaryConditions(int* colHigh, int* colLow, int* rowHigh, int* rowLow, int* bcidHigh, int* bcidLow, bool* bcidSet, int col, int row, int bcid, int tot, EventContainer::iterator* i, std::list<Hit>::iterator* k, ClusterMap::iterator* cit){
+
+	//Check to see if the current hit fits the boundary conditions
+	if(col <= *colHigh && col >= *colLow){
+		if(row <= *rowHigh && row >= *rowLow){
+			if(bcid <= *bcidHigh && bcid >= *bcidLow){
+
+				//If inside here, the hit fits the criteria to be a cluster
+				if(DEBUG)
+					std::cout<<"This hit fits the boundary conditions" << std::endl;
+
+				//(1) Reset limits based on new hit
+				//(a) bcid limits change only once
+				if(DEBUG)
+					std::cout<<"bcidLimits before: ("<< *bcidHigh << " , " << *bcidLow
+						<<"): limitSet = " <<*bcidSet<<std::endl;
+
+				if(!*bcidSet){
+
+					//bcid limit is set per cluster - NB this is designed assuming bcid = +-1
+					resetBcidLimits(bcid, bcidHigh, bcidLow, bcidSet);
+				}   
+
+				if(DEBUG)
+					std::cout<<"bcidLimits after: ("<< *bcidHigh << " , " << *bcidLow
+						<<"): limitSet = " << *bcidSet << std::endl;
+
+
+				//(b) Row limits extend for length of cluster
+
+				if(DEBUG)
+					std::cout<<"rowLimits before: ("<< *rowHigh << " , " << *rowLow
+						<<")"<<std::endl;
+				resetRowLimits(row, rowHigh, rowLow);
+
+
+				if(DEBUG)
+					std::cout<<"rowLimits after: ("<< *rowHigh << " , " << *rowLow
+						<<")"<<std::endl;
+
+				//(b) Col limits extend for length of cluster
+
+				if(DEBUG)
+					std::cout<<"colLimits before: ("<< *colHigh << " , " << *colLow
+						<<")"<<std::endl;
+				resetColLimits(col, colHigh, colLow);
+
+
+				if(DEBUG)
+					std::cout<<"colLimits after: ("<< *colHigh << " , " << *colLow
+						<<")"<<std::endl;
+
+				//With the limits set, add the hit to the cluster
+				(*cit)->second->back().addHit(bcid, col, row, tot);
+
+				//Remove hit from event - iterator safe
+				*k = (*i)->eraseHit(*k);
+				*k--;
+			}   
+		}   
+	}   
+
+}
+
+//TODO: DRAFT ONLY
 //We're going to modify the events in the algorithm so take a copy of the data
 void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 
@@ -157,7 +223,7 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 	ClusterMap::iterator cit;
 	EventMap::iterator mit;
 	EventContainer::iterator i;
-	std::list<Hit>::iterator j,k;
+	std::list<Hit>::iterator k;
 
 	//Temp vars
 	int colHigh(-1), colLow(-1), 
@@ -180,12 +246,14 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 			clusters->insert(std::pair<unsigned,ClusterContainer*>(mit->first, new ClusterContainer));
 		cit = clusters->find(mit->first);
 
-
+		//Event counter
 		int counter1 =0;
 
-	for(i = mit->second->begin(); i!= mit->second->end(); ++i){
-		if(DEBUG)
-			std::cout<<"\n&&&&&&&& N E W    E V E N T &&&&&&&&&&&\n"<<std::endl;
+		//Loop over event
+		for(i = mit->second->begin(); i!= mit->second->end(); ++i){
+			if(DEBUG)
+				std::cout<<"\n&&&&&&&& N E W    E V E N T &&&&&&&&&&&\n"<<std::endl;
+			
 			//Cluster all the hits!
 			while(i->get_nHits() > 0){
 				//In each event, look for clusters
@@ -198,21 +266,22 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 							<<"The number of hits in this event are: "<<
 							i->get_nHits()<<" at place " <<counter1<<"\n" << std::endl;
 
-					//TODO just a quick first go
-					j= i->get_firstHit();
-					bcidSet = false;
-
-					int counter =0;
 					if(DEBUG)
-						std::cout<<"\n------------- Hit loop ----------------" <<std::endl;
-					//Inner loop will reduce in size as stuff is removed (TODO)
+						std::cout<<"\n------------- Hit loop ----------------\n" <<std::endl;
+					
+					//Reset bcid check
+					bcidSet = false;
+					//Hit iterator counter
+					int counter =0;
+					
+					//Loop over hits
 					for(k = i->get_firstHit(); k != i->get_endOfHits();  ++k){
 
-
+						//First hit operations
 						if(counter==0){
 							if(DEBUG)
 								std::cout<<"\niteration: "<<counter<<std::endl;
-							//Get variables from first hit
+							
 							//Boundary checks
 							colHigh =(int)k->get_col()+colLimit;
 							colLow = colHigh-2*colLimit;
@@ -239,7 +308,6 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 									<<"\nbcidHigh: "<<bcidHigh<<", bcidLow: " <<bcidLow
 									<<std::endl;
 							}
-
 
 							//Boundary checks
 							if(colHigh > nCols)
@@ -274,6 +342,7 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 									<<"\nbcidHigh: "<<bcidHigh<<", bcidLow: " <<bcidLow
 									<<std::endl;
 							}
+							
 							//Add a new cluster to the container
 							cit->second->push_back(Cluster());
 							cit->second->back().addHit(bcid, col, row, tot);
@@ -282,14 +351,15 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 							//Remove hit from event and increment by 1.
 							k = i->eraseHit(k);
 							//Now we have added this hit to the cluster we can increment the iterator. 
-							//Don't delete it from the event data yet because it might not be a real cluster
 							counter++;
 							//Finally, if this was a 1-hit event, break.
 							if(i->get_nHits() == 0)
 								break;
 						}
+
 						if(PRINTOUTS)
-						std::cout<<"\nIteration: "<<counter<<std::endl;
+							std::cout<<"\nIteration: "<<counter<<std::endl;
+						
 						//Get vars from hit
 						bcid = k->get_bcid();
 						col = k->get_col();
@@ -303,91 +373,38 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 								<<"\nrow: " <<row
 								<<"\ntot: " <<tot <<std::endl;
 						}
+						
+						//Check to see if this hit should be added to the cluster, if yes: add it and remove it from event
+						checkHitFitsBoundaryConditions(&colHigh, &colLow, &rowHigh, &rowLow, &bcidHigh, &bcidLow, &bcidSet, col, row, bcid, tot, &i, &k, &cit);
 
-						//Check to see if the current hit fits the boundary conditions
-						if(col <= colHigh && col >= colLow){
-							if(row <= rowHigh && row >= rowLow){
-								if(bcid <= bcidHigh && bcid >= bcidLow){
-
-									//If inside here, the hit fits the criteria to be a cluster
-									if(DEBUG)
-										std::cout<<"This hit fits the boundary conditions" << std::endl;
-
-									//(1) Reset limits based on new hit
-									//(a) bcid limits change only once
-									if(DEBUG)
-										std::cout<<"bcidLimits before: ("<< bcidHigh << " , " <<bcidLow
-											<<"): limitSet = " <<bcidSet<<std::endl;
-
-									if(!bcidSet){
-
-										//bcid limit is set per cluster - NB this is designed assuming bcid = +-1
-										resetBcidLimits(bcid, &bcidHigh, &bcidLow, &bcidSet);
-									}
-
-									if(DEBUG)
-										std::cout<<"bcidLimits after: ("<< bcidHigh << " , " <<bcidLow
-											<<"): limitSet = " <<bcidSet<<std::endl;
-
-									//(b) Row limits extend for length of cluster
-
-									if(DEBUG)
-										std::cout<<"rowLimits before: ("<< rowHigh << " , " <<rowLow
-											<<")"<<std::endl;
-									resetRowLimits(row, &rowHigh, &rowLow);
-
-
-									if(DEBUG)
-										std::cout<<"rowLimits after: ("<< rowHigh << " , " <<rowLow
-											<<")"<<std::endl;
-
-									//(b) Col limits extend for length of cluster
-
-									if(DEBUG)
-										std::cout<<"colLimits before: ("<< colHigh << " , " <<colLow
-											<<")"<<std::endl;
-									resetColLimits(col, &colHigh, &colLow);
-
-
-									if(DEBUG)
-										std::cout<<"colLimits after: ("<< colHigh << " , " <<colLow
-											<<")"<<std::endl;
-									//With the limits set, add the hit to the cluster
-									cit->second->back().addHit(k->get_bcid(), k->get_col(), k->get_row(), k->get_tot());
-
-									//Remove hit from event, iterator safe
-									k = i->eraseHit(k);
-									k--;
-									if(DEBUG)
-										std::cout<<"\nThe number of hits remaining in this event are: "
-											<< i->get_nHits() <<std::endl;
-								}
-							}
-						}
 						counter++;
 					}
-					//If there were no hits for this cluster remove cluster, 
-					//else remove first hit from event
+					
+					//If there is more than 1 hit in the cluster, and if there are still hits in the event
 					if(cit->second->back().get_size() > 1 && i->get_nHits()>0){
 						//iterate through the list again to check that no hits were missed
 						//with the final bounds
-						//While there are still hits in the event
 
+						//This is the while loop break condition, if, after an iteration the cluster size hasn't increased 
+						//None of the remaining hits belong in the cluster
 						int clusterSizeOld = cit->second->back().get_size();
 						int clusterSizeNew = 0;
 
+						//Second break condition: run out of hits
 						while(i->get_nHits()>0){
 
 							if(DEBUG){
 								std::cout<<"Iterated through event. Now cross-checking hits with current cluster"<<std::endl;
 								counter = 0;
 							}
+
 							//If no new hits have been added to the cluster, we have them all
 							if(clusterSizeOld == clusterSizeNew)
 								break;
 
 							clusterSizeOld = clusterSizeNew;
 
+							//Iterate through remainign hits
 							for(k = i->get_firstHit(); k != i->get_endOfHits(); ++k){
 
 								//Get vars from hit
@@ -404,76 +421,20 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 										<<"\ntot: " <<tot <<std::endl;
 								}
 
-								//Check to see if the current hit fits the boundary conditions
-								if(col <= colHigh && col >= colLow){
-									if(row <= rowHigh && row >= rowLow){
-										if(bcid <= bcidHigh && bcid >= bcidLow){
-
-											//If inside here, the hit fits the criteria to be a cluster
-											if(DEBUG)
-												std::cout<<"This hit fits the boundary conditions" << std::endl;
-
-											//(1) Reset limits based on new hit
-											//(a) bcid limits change only once
-											if(DEBUG)
-												std::cout<<"bcidLimits before: ("<< bcidHigh << " , " <<bcidLow
-													<<"): limitSet = " <<bcidSet<<std::endl;
-
-											if(!bcidSet){
-
-												//bcid limit is set per cluster - NB this is designed assuming bcid = +-1
-												resetBcidLimits(bcid, &bcidHigh, &bcidLow, &bcidSet);
-											}
-
-											if(DEBUG)
-												std::cout<<"bcidLimits after: ("<< bcidHigh << " , " <<bcidLow
-													<<"): limitSet = " <<bcidSet<<std::endl;
-
-
-											//(b) Row limits extend for length of cluster
-
-											if(DEBUG)
-												std::cout<<"rowLimits before: ("<< rowHigh << " , " <<rowLow
-													<<")"<<std::endl;
-											resetRowLimits(row, &rowHigh, &rowLow);
-
-
-											if(DEBUG)
-												std::cout<<"rowLimits after: ("<< rowHigh << " , " <<rowLow
-													<<")"<<std::endl;
-
-											//(b) Col limits extend for length of cluster
-
-											if(DEBUG)
-												std::cout<<"colLimits before: ("<< colHigh << " , " <<colLow
-													<<")"<<std::endl;
-											resetColLimits(col, &colHigh, &colLow);
-
-
-											if(DEBUG)
-												std::cout<<"colLimits after: ("<< colHigh << " , " <<colLow
-													<<")"<<std::endl;
-											//With the limits set, add the hit to the cluster
-											cit->second->back().addHit(k->get_bcid(), k->get_col(), k->get_row(), k->get_tot());
-
-											//Remove hit from event - iterator safe
-											k = i->eraseHit(k);
-											k--;
-										}
-									}
-								}
-
-							} //for loop
-
+								//Check to see if this hit should be added to the cluster, if yes: add it and remove it from event
+								checkHitFitsBoundaryConditions(&colHigh, &colLow, &rowHigh, &rowLow, &bcidHigh, &bcidLow, &bcidSet, col, row, bcid, tot, &i, &k, &cit);
+							}
+							
+							//Check cluster size after iteration
 							clusterSizeNew = cit->second->back().get_size(); 
 
-						}
-					}
+						} //while loop
+					} //if statement
 
-				}
+				} //Outer if statment
 
 				counter1++;
-			}
-		}
-	}
+			} //while(hits in event) 
+		} //Event loop
+	} //link loop
 }
