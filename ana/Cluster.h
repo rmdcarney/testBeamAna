@@ -36,23 +36,26 @@ class Cluster{
 		void findToT();
 		//Getters
 		std::list<Hit>::iterator get_firstHit();
-		std::list<Hit>::iterator get_lastHit();
+		std::list<Hit>::iterator get_endOfHits();
 		unsigned get_size();
 		unsigned get_totalToT();
 		unsigned get_width();
 		unsigned get_nDeltaRays();
+		unsigned get_lv1id();
 
 
 		//******* Setters ********
 		//TODO void setData(std::vector<double> newT, std::vector<double> newY);
 		void set_ToT(unsigned arg_lv1id);
 		void set_width(unsigned arg_chipID);
+		void set_lv1id(unsigned arg_lv1id);
 
 	private:
 		unsigned size;
 		unsigned width;
 		unsigned tot;
 		unsigned nDeltaRays;
+		unsigned lv1id;
 		std::list<Hit> hits;
 
 		

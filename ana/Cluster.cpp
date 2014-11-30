@@ -16,6 +16,7 @@ Cluster::Cluster() {
 	width=0;
 	tot=0;
 	nDeltaRays=0;
+	lv1id=0;
 	//Hit container - ready!
 	Hits hits;
 }
@@ -43,10 +44,13 @@ std::list<Hit>::iterator Cluster::get_firstHit(){
 	return hits.begin();
 }
 
-std::list<Hit>::iterator Cluster::get_lastHit(){
+std::list<Hit>::iterator Cluster::get_endOfHits(){
 	return hits.end();
 }
 
+unsigned Cluster::get_lv1id(){
+	return lv1id;
+}
 
 unsigned Cluster::get_size(){
 	return hits.size();
@@ -58,6 +62,8 @@ unsigned Cluster::get_width(){
 }
 
 unsigned Cluster::get_totalToT(){
+	if(tot == 0)
+		findToT();
 	return tot;
 }
 
@@ -69,5 +75,9 @@ unsigned Cluster::get_nDeltaRays(){
 
 void Cluster::set_ToT(unsigned arg_tot){
 	tot = arg_tot;
+}
+
+void Cluster::set_lv1id(unsigned arg_lv1id){
+	lv1id = arg_lv1id;
 }
 
