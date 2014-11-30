@@ -20,6 +20,7 @@ int main(int argc, char* argv[]){
 	EventMap::iterator i;
 	EventContainer::iterator j;
 	ClusterMap::iterator k;
+	ClusterContainer::iterator m;
 
 	//Import the data into the map. Check to see if PRINTOUTS = 1 or not. 
 	std::cout<<"Starting..."<<std::endl;
@@ -57,9 +58,21 @@ int main(int argc, char* argv[]){
 	Algorithm::findClusters_iterative(&clusters, events);
 
 	//Check out the stats
-	TH1F* clusterSize = Plot::clusterSize(clusters[0]);
-	TH1F* clusterToT = Plot::clusterToT(clusters[0]);
-	std::list<TH2F*> eventPlots = Plot::eventClusters(clusters[0]);
+	TH1F* clusterSize = Plot::clusterSize(clusters[3]);
+	TH1F* clusterToT = Plot::clusterToT(clusters[3]);
+
+	ClusterContainer someClusters;
+	k = clusters.begin();
+	k++;
+	k++;
+	k++;
+	m = k->second->begin();
+	for(unsigned bla=0; bla<20; bla++){
+		someClusters.push_back(*m);
+		++m;
+	}
+
+	std::map<unsigned, TH2F*> eventPlots = Plot::eventClusters(&someClusters);
 
 	string path = "plots/";
 	string eventsPath = "plots/clusters/";
@@ -68,9 +81,9 @@ int main(int argc, char* argv[]){
 	Plot::print(clusterSize, path);
 	Plot::print(clusterToT, path);
 
-	std::list<TH2F*>::iterator it;
+	std::map<unsigned, TH2F*>::iterator it;
 	for(it = eventPlots.begin(); it != eventPlots.end(); ++it)
-		Plot::print((*it), eventsPath);
+		Plot::print((it->second), eventsPath);
 
 	//Clean up
 	for(i=events.begin(); i != events.end(); ++i)
