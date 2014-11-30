@@ -32,9 +32,15 @@ void Cluster::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 void Cluster::findToT(){
 	std::list<Hit>::iterator i;
 	tot = 0;
-	if(!hits.empty()){
-	for(i=hits.begin(); i!=hits.end(); ++i)
-		tot += i->get_tot();
+	if(!hits.empty() && hits.size()>1){
+		for(i=hits.begin(); i!=hits.end(); ++i){
+			if(i->get_tot()<14){
+				tot += i->get_tot();
+			} else {
+				tot = 0;
+				break;
+			}
+		}
 	}
 }
 
