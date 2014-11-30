@@ -25,15 +25,15 @@ int main(int argc, char* argv[]){
 	std::cout<<"Starting..."<<std::endl;
 	std::cout<<"Reading data file...."<<std::endl;
 	reader.m_importData(&events);
-	
+
 	//Check that the data got added to the map correctly
 	std::cout<<"*********************************"<<std::endl;
 	std::cout<< "There is data in the map from: "
 		<<events.size() << " links." << std::endl;
 	std::cout<<"*********************************"<<std::endl;
-	
+
 	std::cout<<"*Link*\t*# of hits*" << std::endl;
-	
+
 	for(i=events.begin(); i!=events.end(); ++i){
 		for(j=i->second->begin(); j != i->second->end(); ++j){
 			numHits += j->get_nHits();
@@ -58,11 +58,19 @@ int main(int argc, char* argv[]){
 
 	//Check out the stats
 	TH1F* clusterSize = Plot::clusterSize(clusters[0]);
-	
+	TH1F* clusterToT = Plot::clusterToT(clusters[0]);
+	std::list<TH2F*> eventPlots = Plot::eventClusters(clusters[0]);
+
 	string path = "plots/";
-	
+	string eventsPath = "plots/clusters/";
+
 	//Print plots
 	Plot::print(clusterSize, path);
+	Plot::print(clusterToT, path);
+
+	std::list<TH2F*>::iterator it;
+	for(it = eventPlots.begin(); it != eventPlots.end(); ++it)
+		Plot::print((*it), eventsPath);
 
 	//Clean up
 	for(i=events.begin(); i != events.end(); ++i)
@@ -70,5 +78,8 @@ int main(int argc, char* argv[]){
 
 	for(k=clusters.begin(); k != clusters.end(); ++k)
 		delete k->second;
-	
+
+	//TODO
+	delete clusterSize;
+	delete clusterToT;
 }
