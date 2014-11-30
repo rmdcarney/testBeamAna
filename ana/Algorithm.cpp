@@ -346,7 +346,7 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 							//Add a new cluster to the container
 							cit->second->push_back(Cluster());
 							cit->second->back().addHit(bcid, col, row, tot);
-
+							cit->second->back().set_lv1id(i->get_lv1id());
 
 							//Remove hit from event and increment by 1.
 							k = i->eraseHit(k);
