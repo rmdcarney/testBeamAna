@@ -89,7 +89,7 @@ void RCEDataReader::m_importData(EventMap* events ){
 
 				//For a new event (i.e. a new trigger), add an event to the EventContainer
 				events->at(link)->push_back(Event(record.get_lv1id()));
-				
+			
 				//This is used in the Hit info
 				bcid = record.get_bcid();
 				
