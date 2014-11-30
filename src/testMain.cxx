@@ -1,8 +1,7 @@
 #include <iostream>
-#include "Hit.h"
-#include "Event.h"
 #include "RCEDataReader.h"
 #include "Algorithm.h"
+#include "Plot.h"
 
 int main(int argc, char* argv[]){
 
@@ -56,7 +55,15 @@ int main(int argc, char* argv[]){
 
 	//Make clusters
 	Algorithm::findClusters_iterative(&clusters, events);
+
+	//Check out the stats
+	TH1F* clusterSize = Plot::clusterSize(clusters[0]);
 	
+	string path = "plots/";
+	
+	//Print plots
+	Plot::print(clusterSize, path);
+
 	//Clean up
 	for(i=events.begin(); i != events.end(); ++i)
 		delete i->second;
