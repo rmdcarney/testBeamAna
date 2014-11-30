@@ -16,6 +16,7 @@
 
 #define nRows 336
 #define nCols 80
+#define min 1
 
 //*** V A R S *****
 int crimson = TColor::GetColor(220,20,60);
@@ -41,7 +42,7 @@ TH1F* Plot::clusterSize(ClusterContainer* myClusters){
 
 	ClusterContainer::iterator i;
 	TH1F* sizeHist;
-	TCanvas* c1;
+
 
 	int largest(-1), smallest(1e5), size(-1);
 
@@ -73,6 +74,92 @@ TH1F* Plot::clusterSize(ClusterContainer* myClusters){
 
 }
 
+TH1F* Plot::clusterToT(ClusterContainer* myClusters){
+
+	ClusterContainer::iterator i;
+	TH1F* totHist;
+
+	int largest(-1), smallest(1e5), size(-1);
+
+	//Find the largest and smallest sizes
+	for(i= myClusters->begin(); i!= myClusters->end(); ++i){
+		size = i->get_totalToT();
+		if(size > largest)
+			largest = size;
+		else if(size < smallest)
+			smallest = size;
+	}
+
+	int nBins = (largest-smallest)+2; //To ensure any rounding down is taken care of 
+
+	//Initialise th1
+	totHist = new TH1F("Cluster_tot","Cluster_tot", nBins, (double)smallest, (double)largest);
+
+	//Fill
+	for(i = myClusters->begin(); i!= myClusters->end(); ++i)
+		totHist->Fill(i->get_totalToT());
+
+	//Add labels
+	totHist->SetXTitle("Cluster tot [bc]");
+	totHist->SetYTitle("# of clusters");
+	totHist->SetFillColor(turquoise);
+	totHist->SetOption("TEXT00HIST");
+
+	return totHist;
+
+}
+
+std::list<TH2F*> eventClusters(ClusterContainer* myClusters){
+
+	std::list<TH2F*> plots;
+	ClusterContainer::iterator i;
+	std::list<Hit>::iterator j;
+	std::stringstream ss;
+
+	unsigned lv1id(-1), current_lv1id(-1), counter(0);
+	std::string base = "eventClusters_";
+	std::string title = "";
+	std::string xLabel = "Column [pixel]";
+	std::string yLabel = "Row [Pixel]";
+	std::string zLabel = "Cluster #";
+
+	for(i = myClusters->begin(); i != myClusters->end(); ++i){
+		//Get the event associated with this cluster
+		lv1id = i->get_lv1id();
+
+		//If this is a new event, start a new hist
+		if(lv1id != current_lv1id){
+			//reset values
+			counter = 0;
+			current_lv1id = lv1id;
+			ss << current_lv1id;
+			title = base + ss.str();
+			//Clear ss
+			ss.str("");
+
+			//Make new hist
+			plots.push_back(new TH2F(title.c_str(), title.c_str(), nCols, min, nCols, nRows, min, nRows));
+			plots.back()->SetXTitle(xLabel.c_str());
+			plots.back()->SetYTitle(yLabel.c_str());
+			plots.back()->SetZTitle(zLabel.c_str());
+			plots.back()->SetOption("COLZ");
+			title = "";
+		}
+
+		//Loop over hits in cluster, each new cluster gets a different weight
+		//and hence a different colour
+		for(j = i->get_firstHit(); j != i->get_endOfHits(); ++j){
+
+			plots.back()->Fill(j->get_col(), j->get_row(), counter);
+		}
+		counter++;
+	}
+
+	return plots;
+}
+
+
+
 void Plot::print(TH1F* myTH1F, std::string path){
 
 	std::string title = myTH1F->GetTitle();
@@ -91,5 +178,21 @@ void Plot::print(TH1F* myTH1F, std::string path){
 	c1->Print(filenamePng.c_str());
 }
 
+void Plot::print(TH2F* myTH2F, std::string path){
 
+	std::string title = myTH2F->GetTitle();
+
+	std::string filenameRoot = path + title + ".root";
+	std::string filenameEps = path + title + ".eps";
+	std::string filenamePng = path + title + ".png";
+
+	TCanvas* c1 = new TCanvas( title.c_str(), title.c_str() );
+
+	myTH2F->Draw();
+	c1->Update();
+
+	c1->Print(filenameRoot.c_str());
+	c1->Print(filenameEps.c_str());	
+	c1->Print(filenamePng.c_str());
+}
 
