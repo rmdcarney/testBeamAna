@@ -44,7 +44,7 @@ namespace Plot{
 	TH1D* centreOfCharge(ClusterContainer* myClusters);
 
 	//2D hists
-	std::list<TH2F*> eventClusters(ClusterContainer* myClusters);
+	std::map<unsigned,TH2F*> eventClusters(ClusterContainer* myClusters);
 	TH2F* cumulativeOccupancy(std::list<Cluster*> allClusters);
 	TH2F* eventMasked(Event* myEvent, std::list<std::pair<int,int> > maskedPixels);
 	

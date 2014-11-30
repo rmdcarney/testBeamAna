@@ -79,18 +79,8 @@ TH1F* Plot::clusterToT(ClusterContainer* myClusters){
 	ClusterContainer::iterator i;
 	TH1F* totHist;
 
-	int largest(-1), smallest(1e5), size(-1);
-
-	//Find the largest and smallest sizes
-	for(i= myClusters->begin(); i!= myClusters->end(); ++i){
-		size = i->get_totalToT();
-		if(size > largest)
-			largest = size;
-		else if(size < smallest)
-			smallest = size;
-	}
-
-	int nBins = (largest-smallest)+2; //To ensure any rounding down is taken care of 
+	int smallest(1), largest(100);
+	int nBins = (largest-smallest)+1; //To ensure any rounding down is taken care of 
 
 	//Initialise th1
 	totHist = new TH1F("Cluster_tot","Cluster_tot", nBins, (double)smallest, (double)largest);
@@ -103,20 +93,21 @@ TH1F* Plot::clusterToT(ClusterContainer* myClusters){
 	totHist->SetXTitle("Cluster tot [bc]");
 	totHist->SetYTitle("# of clusters");
 	totHist->SetFillColor(turquoise);
-	totHist->SetOption("TEXT00HIST");
+	totHist->SetOption("HIST");
 
 	return totHist;
 
 }
 
-std::list<TH2F*> eventClusters(ClusterContainer* myClusters){
+std::map<unsigned,TH2F*> Plot::eventClusters(ClusterContainer* myClusters){
 
-	std::list<TH2F*> plots;
+	std::map<unsigned,TH2F*> plots;
+	std::map<unsigned,unsigned> weight;
 	ClusterContainer::iterator i;
 	std::list<Hit>::iterator j;
 	std::stringstream ss;
 
-	unsigned lv1id(-1), current_lv1id(-1), counter(0);
+	unsigned lv1id(-1), current_lv1id(-1), counter(1);
 	std::string base = "eventClusters_";
 	std::string title = "";
 	std::string xLabel = "Column [pixel]";
@@ -129,28 +120,36 @@ std::list<TH2F*> eventClusters(ClusterContainer* myClusters){
 
 		//If this is a new event, start a new hist
 		if(lv1id != current_lv1id){
-			//reset values
-			counter = 0;
+			
 			current_lv1id = lv1id;
-			ss << current_lv1id;
-			title = base + ss.str();
-			//Clear ss
-			ss.str("");
+			
+			//See if the event exists
+			if(plots.find(lv1id) == plots.end()){
+				
+				weight.insert(std::pair<unsigned,unsigned>(lv1id,1));
+				ss << current_lv1id;
+				title = base + ss.str();
+				//Clear ss
+				ss.str("");
 
-			//Make new hist
-			plots.push_back(new TH2F(title.c_str(), title.c_str(), nCols, min, nCols, nRows, min, nRows));
-			plots.back()->SetXTitle(xLabel.c_str());
-			plots.back()->SetYTitle(yLabel.c_str());
-			plots.back()->SetZTitle(zLabel.c_str());
-			plots.back()->SetOption("COLZ");
-			title = "";
+				plots.insert(std::pair<unsigned,TH2F*>(lv1id, new TH2F(title.c_str(), title.c_str(), nCols, min, nCols, nRows, min, nRows)));
+
+				plots[lv1id]->SetXTitle(xLabel.c_str());
+				plots[lv1id]->SetYTitle(yLabel.c_str());
+				plots[lv1id]->SetZTitle(zLabel.c_str());
+				plots[lv1id]->SetOption("COLZ");
+				title = "";
+			} else {
+				weight[lv1id] += 1;
+			}
 		}
 
+		counter = weight[lv1id];
 		//Loop over hits in cluster, each new cluster gets a different weight
 		//and hence a different colour
 		for(j = i->get_firstHit(); j != i->get_endOfHits(); ++j){
 
-			plots.back()->Fill(j->get_col(), j->get_row(), counter);
+			plots[lv1id]->Fill(j->get_col(), j->get_row(), counter);
 		}
 		counter++;
 	}
