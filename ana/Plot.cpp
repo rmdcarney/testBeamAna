@@ -99,6 +99,47 @@ TH1F* Plot::clusterToT(ClusterContainer* myClusters){
 
 }
 
+std::pair<TH1F*,TH1F*> Plot::centreOfCharge(ClusterContainer* myClusters){
+
+	ClusterContainer::iterator i;
+	TH1F* cofcHistx;
+	TH1F* cofcHisty;
+	std::pair<TH1F*,TH1F*> histPair;
+	std::pair<double, double> temp;
+
+	int smallest(1), largest(100);
+	int nBins = ((largest-smallest)+1)/5; //To ensure any rounding down is taken care of 
+
+	//Initialise th1
+	cofcHistx = new TH1F("Centre_of_charge_col","Centre_of_charge_col", nBins, (double)smallest, (double)largest);
+	cofcHisty = new TH1F("Centre_of_charge_row","Centre_of_charge_row", nBins, (double)smallest, (double)largest);
+
+	//Fill
+	for(i = myClusters->begin(); i!= myClusters->end(); ++i){
+		temp = i->get_centreOfCharge();
+		cofcHistx->Fill(temp.first);
+		cofcHisty->Fill(temp.second);
+	}
+
+	//Add labels
+	cofcHistx->SetXTitle("Centre of charge [\% of size]");
+	cofcHistx->SetYTitle("# of clusters");
+	cofcHisty->SetXTitle("Centre of charge [\% of size]");
+	cofcHisty->SetYTitle("# of clusters");
+
+	cofcHistx->SetFillColor(blueViolet);
+	cofcHisty->SetFillColor(orange);
+	cofcHistx->SetOption("HIST");
+	cofcHisty->SetOption("HIST");
+
+	histPair.first = cofcHistx;
+	histPair.second = cofcHisty;
+	return histPair;
+
+}
+
+
+
 std::map<unsigned,TH2F*> Plot::eventClusters(ClusterContainer* myClusters){
 
 	std::map<unsigned,TH2F*> plots;

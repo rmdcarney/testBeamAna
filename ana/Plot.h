@@ -41,7 +41,7 @@ namespace Plot{
 	TH1F* clusterSize(ClusterContainer* myClusters);
 	TH1F* clusterToT(ClusterContainer* myClusters);
 	TH1F* deltaRays(ClusterContainer* myClusters);
-	TH1D* centreOfCharge(ClusterContainer* myClusters);
+	std::pair<TH1F*, TH1F*> centreOfCharge(ClusterContainer* myClusters);
 
 	//2D hists
 	std::map<unsigned,TH2F*> eventClusters(ClusterContainer* myClusters);
