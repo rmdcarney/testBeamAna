@@ -10,16 +10,16 @@ AR = ar
 
 CPP = g++
 CPPFLAGS += -Wall -Wextra -Wno-unused-variable -Wno-unused-function\
-	     $(shell root-config --cflags) -I$(BOOSTINC)\
+	     $(shell root-config --cflags) \
 	    -I./ana -I./tools 
 CPPFLAGS_DEBUG += -g -O0
 CPPFLAGS_RELEASE += -O2 -DNDEBUG
 
 LD = g++
-LDFLAGS += `root-config --ldflags` -L$(BOOSTLIB)
+LDFLAGS += `root-config --ldflags` 
 LDFLAGS_DEBUG +=
 LDFLAGS_RELEASE += 
-LIBS =  -lboost_thread$(BOOSTLDADD) -lboost_system$(BOOSTLDADD) -lboost_filesystem$(BOOSTLDADD) $(shell root-config --libs)
+LIBS =  $(shell root-config --libs)
 
 BIN = bin
 SRC = src
