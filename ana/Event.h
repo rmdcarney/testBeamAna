@@ -17,7 +17,6 @@
 #include <map>
 #include <vector>
 #include <list>
-#include <boost/lexical_cast.hpp>
 #include <sstream>
 
 #include "Hit.h"

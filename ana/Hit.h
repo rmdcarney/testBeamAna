@@ -16,7 +16,6 @@
 #include <fstream>
 #include <map>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 #include <sstream>
 
 using namespace std;
