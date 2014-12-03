@@ -58,14 +58,12 @@ int main(int argc, char* argv[]){
 	Algorithm::findClusters_iterative(&clusters, events);
 
 	//Check out the stats
-	TH1F* clusterSize = Plot::clusterSize(clusters[3]);
-	TH1F* clusterToT = Plot::clusterToT(clusters[3]);
+	TH1F* clusterSize = Plot::clusterSize(clusters[0]);
+	TH1F* clusterToT = Plot::clusterToT(clusters[0]);
+	std::pair<TH1F*,TH1F*> centreOfChargePair = Plot::centreOfCharge(clusters[0]);
 
 	ClusterContainer someClusters;
 	k = clusters.begin();
-	k++;
-	k++;
-	k++;
 	m = k->second->begin();
 	for(unsigned bla=0; bla<20; bla++){
 		someClusters.push_back(*m);
@@ -73,13 +71,15 @@ int main(int argc, char* argv[]){
 	}
 
 	std::map<unsigned, TH2F*> eventPlots = Plot::eventClusters(&someClusters);
-
+	
 	string path = "plots/";
 	string eventsPath = "plots/clusters/";
 
 	//Print plots
 	Plot::print(clusterSize, path);
 	Plot::print(clusterToT, path);
+	Plot::print(centreOfChargePair.first, path);
+	Plot::print(centreOfChargePair.second, path);
 
 	std::map<unsigned, TH2F*>::iterator it;
 	for(it = eventPlots.begin(); it != eventPlots.end(); ++it)
