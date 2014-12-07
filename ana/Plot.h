@@ -38,13 +38,14 @@ namespace Plot{
 	
 //*** M E T H O D S *****
 	//1D hists
-	TH1F* clusterSize(ClusterContainer* myClusters);
+	std::list<TH1F*> clusterSize(ClusterContainer* myClusters);
 	TH1F* clusterToT(ClusterContainer* myClusters);
 	TH1F* deltaRays(ClusterContainer* myClusters);
 	std::pair<TH1F*, TH1F*> centreOfCharge(ClusterContainer* myClusters);
 
 	//2D hists
 	std::map<unsigned,TH2F*> eventClusters(ClusterContainer* myClusters);
+	std::map<unsigned,TH2F*> eventToT(ClusterContainer* myClusters);
 	TH2F* cumulativeOccupancy(std::list<Cluster*> allClusters);
 	TH2F* eventMasked(Event* myEvent, std::list<std::pair<int,int> > maskedPixels);
 	

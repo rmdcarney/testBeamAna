@@ -37,12 +37,13 @@ int tomato = TColor::GetColor(255,99,71);
 int cyan = TColor::GetColor(64,224,208);
 
 
-TH1F* Plot::clusterSize(ClusterContainer* myClusters){
+std::list<TH1F*> Plot::clusterSize(ClusterContainer* myClusters){
 
-
+	std::list<TH1F*> sizePlots;
 	ClusterContainer::iterator i;
 	TH1F* sizeHist;
-
+	TH1F* lengthHist;
+	TH1F* widthHist;
 
 	int largest(-1), smallest(1e5), size(-1);
 
@@ -59,18 +60,38 @@ TH1F* Plot::clusterSize(ClusterContainer* myClusters){
 
 	//Initialise th1
 	sizeHist = new TH1F("Cluster_size","Cluster_size", nBins, (double)smallest, (double)largest);
-
+	lengthHist = new TH1F("Cluster_length","Cluster_length", nBins, (double)smallest, (double)largest);
+	widthHist = new TH1F("Cluster_width","Cluster_width", nBins, (double)smallest, (double)largest);
+	
 	//Fill
-	for(i = myClusters->begin(); i!= myClusters->end(); ++i)
+	for(i = myClusters->begin(); i!= myClusters->end(); ++i){
 		sizeHist->Fill(i->get_size());
+		lengthHist->Fill(i->get_length());
+		widthHist->Fill(i->get_width());
+	}
 
 	//Add labels
 	sizeHist->SetXTitle("Cluster size [pixels]");
 	sizeHist->SetYTitle("# of clusters");
-	sizeHist->SetFillColor(crimson);
+	sizeHist->SetFillColor(cadetBlue);
 	sizeHist->SetOption("TEXT00HIST");
 
-	return sizeHist;
+	lengthHist->SetXTitle("Cluster length [pixels along row]");
+	lengthHist->SetYTitle("# of clusters");
+	lengthHist->SetFillColor(chatreuse);
+	lengthHist->SetOption("TEXT00HIST");
+	
+	widthHist->SetXTitle("Cluster width [pixels along column]");
+	widthHist->SetYTitle("# of clusters");
+	widthHist->SetFillColor(deepSkyBlue);
+	widthHist->SetOption("TEXT00HIST");
+	
+	//Add plots to list
+	sizePlots.push_back(sizeHist);
+	sizePlots.push_back(lengthHist);
+	sizePlots.push_back(widthHist);
+
+	return sizePlots;
 
 }
 
@@ -195,6 +216,55 @@ std::map<unsigned,TH2F*> Plot::eventClusters(ClusterContainer* myClusters){
 		counter++;
 	}
 
+	return plots;
+}
+
+std::map<unsigned,TH2F*> Plot::eventToT(ClusterContainer* myClusters){
+
+	std::map<unsigned,TH2F*> plots;
+	ClusterContainer::iterator i;
+	std::list<Hit>::iterator j;
+	std::stringstream ss;
+
+	unsigned lv1id(-1), current_lv1id(-1), counter(1);
+	std::string base = "eventToT_";
+	std::string title = "";
+	std::string xLabel = "Column [pixel]";
+	std::string yLabel = "Row [Pixel]";
+	std::string zLabel = "ToT";
+
+	for(i = myClusters->begin(); i != myClusters->end(); ++i){
+		//Get the event associated with this cluster
+		lv1id = i->get_lv1id();
+
+		//If this is a new event, start a new hist
+		if(lv1id != current_lv1id){
+			
+			current_lv1id = lv1id;
+			
+			//See if the event exists: if not add it to plots
+			if(plots.find(lv1id) == plots.end()){
+				
+				ss << current_lv1id;
+				title = base + ss.str();
+				//Clear ss
+				ss.str("");
+
+				plots.insert(std::pair<unsigned,TH2F*>(lv1id, new TH2F(title.c_str(), title.c_str(), nCols, min, nCols, nRows, min, nRows)));
+
+				plots[lv1id]->SetXTitle(xLabel.c_str());
+				plots[lv1id]->SetYTitle(yLabel.c_str());
+				plots[lv1id]->SetZTitle(zLabel.c_str());
+				plots[lv1id]->SetOption("COLZ");
+				title = "";
+			} 
+		}
+
+		//Loop over hits in cluster, each new cluster gets a different weight
+		//and hence a different colour
+		for(j = i->get_firstHit(); j != i->get_endOfHits(); ++j)
+			plots[lv1id]->Fill(j->get_col(), j->get_row(),j->get_tot());	
+	}
 	return plots;
 }
 
