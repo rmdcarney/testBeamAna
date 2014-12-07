@@ -14,6 +14,7 @@
 Cluster::Cluster() {
 	size=0;
 	width=0;
+	length=0;
 	tot=0;
 	nDeltaRays=0;
 	lv1id=0;
@@ -32,7 +33,48 @@ void Cluster::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 	hits.push_back(Hit(bcid, col, row, tot));
 }
 
+
+//******* finders - calculate properties of the cluster ********
+
+bool compare_cols(const Hit& lhs, const Hit& rhs){
+	
+	if(lhs.get_col() > rhs.get_col())
+		return false;
+	else{
+		return true;
+	}
+}
+
+bool compare_rows(const Hit& lhs, const Hit& rhs){
+	
+	if(lhs.get_row() > rhs.get_row())
+		return false;
+	else{
+		return true;
+	}
+}
+
+
+void Cluster::find_width(){
+
+	//Sort by col
+	hits.sort(compare_cols);
+
+	//Then take the difference of the first and last values
+	set_width(hits.back().get_col() - hits.front().get_col() + 1);
+}
+
+void Cluster::find_length(){
+
+	//Sort by row
+	hits.sort(compare_rows);
+	
+	//Then take the difference of the first and last values
+	set_length(hits.back().get_row() - hits.front().get_row() + 1);
+}
+
 void Cluster::findToT(){
+	
 	std::list<Hit>::iterator i;
 	tot = 0;
 	if(!hits.empty() && hits.size()>1){
@@ -133,8 +175,23 @@ unsigned Cluster::get_size(){
 }
 
 unsigned Cluster::get_width(){
-//TODO
+	if(width == 0){
+		if(DEBUG)
+			std::cout<<"I am starting to caluclate the width"
+				<<std::endl;
+		find_width();
+	}
 	return width;
+}
+
+unsigned Cluster::get_length(){
+	if(length == 0){
+		if(DEBUG)
+			std::cout<<"I am starting to caluclate the length"
+				<<std::endl;
+		find_length();
+}
+	return length;
 }
 
 unsigned Cluster::get_totalToT(){
@@ -163,4 +220,14 @@ void Cluster::set_ToT(unsigned arg_tot){
 void Cluster::set_lv1id(unsigned arg_lv1id){
 	lv1id = arg_lv1id;
 }
+
+void Cluster::set_length(unsigned arg_length){
+	length = arg_length;
+}
+
+void Cluster::set_width(unsigned arg_width){
+	width = arg_width;
+}
+
+
 

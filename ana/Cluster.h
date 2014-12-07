@@ -32,8 +32,6 @@ class Cluster{
 		//Methods
 		void addHit(Hit arg_hits);
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
-		void findToT();
-		void findCentreOfCharge();
 
 		//Getters
 		std::list<Hit>::iterator get_firstHit();
@@ -44,24 +42,35 @@ class Cluster{
 		unsigned get_width();
 		unsigned get_nDeltaRays();
 		unsigned get_lv1id();
-		
+		unsigned get_length();
+
 		//******* Setters ********
 		//TODO void setData(std::vector<double> newT, std::vector<double> newY);
-		void set_ToT(unsigned arg_lv1id);
-		void set_width(unsigned arg_chipID);
 		void set_lv1id(unsigned arg_lv1id);
-		void set_centreOfChagrge(std::pair<unsigned,unsigned> arg_cOfc);
 
 	private:
+		//Vars
 		unsigned size;
 		unsigned width;
 		unsigned tot;
+		unsigned length;
 		unsigned nDeltaRays;
 		unsigned lv1id;
 		bool totOverflow;
 		std::list<Hit> hits;
-		std::pair<double,double> centreOfCharge; 
-		
+		std::pair<double,double> centreOfCharge;
+
+		//Methods
+		void find_width();
+		void find_length();
+		void findToT();
+		void findCentreOfCharge();
+
+		//Vars
+		void set_centreOfCharge(std::pair<unsigned,unsigned> arg_cOfc);
+		void set_ToT(unsigned arg_tot);
+		void set_length(unsigned length);
+		void set_width(unsigned width);
 };
 
 typedef std::list<Cluster> ClusterContainer;
