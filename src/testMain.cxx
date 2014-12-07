@@ -21,6 +21,7 @@ int main(int argc, char* argv[]){
 	EventContainer::iterator j;
 	ClusterMap::iterator k;
 	ClusterContainer::iterator m;
+	std::list<TH1F*>::iterator n;
 
 	//Import the data into the map. Check to see if PRINTOUTS = 1 or not. 
 	std::cout<<"Starting..."<<std::endl;
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]){
 	Algorithm::findClusters_iterative(&clusters, events);
 
 	//Check out the stats
-	TH1F* clusterSize = Plot::clusterSize(clusters[0]);
+	std::list<TH1F*> sizePlots = Plot::clusterSize(clusters[0]);
 	TH1F* clusterToT = Plot::clusterToT(clusters[0]);
 	std::pair<TH1F*,TH1F*> centreOfChargePair = Plot::centreOfCharge(clusters[0]);
 
@@ -71,12 +72,12 @@ int main(int argc, char* argv[]){
 	}
 
 	std::map<unsigned, TH2F*> eventPlots = Plot::eventClusters(&someClusters);
-	
+	std::map<unsigned, TH2F*> eventToT = Plot::eventToT(&someClusters);
+
 	string path = "plots/";
 	string eventsPath = "plots/clusters/";
 
 	//Print plots
-	Plot::print(clusterSize, path);
 	Plot::print(clusterToT, path);
 	Plot::print(centreOfChargePair.first, path);
 	Plot::print(centreOfChargePair.second, path);
@@ -85,14 +86,16 @@ int main(int argc, char* argv[]){
 	for(it = eventPlots.begin(); it != eventPlots.end(); ++it)
 		Plot::print((it->second), eventsPath);
 
+	for(n = sizePlots.begin(); n != sizePlots.end(); ++n)
+		Plot::print((*n), path);
+
+	for(it = eventToT.begin(); it != eventToT.end(); ++it)
+		Plot::print((it->second), eventsPath);
+
 	//Clean up
 	for(i=events.begin(); i != events.end(); ++i)
 		delete i->second;
 
 	for(k=clusters.begin(); k != clusters.end(); ++k)
 		delete k->second;
-
-	//TODO
-	delete clusterSize;
-	delete clusterToT;
 }
