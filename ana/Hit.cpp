@@ -26,21 +26,22 @@ Hit::Hit(int arg_bcid, int arg_col, int arg_row, int arg_tot){
 	set_tot(arg_tot);
 }
 
+
 //Getters
 
-int Hit::get_bcid(){
+int Hit::get_bcid() const{
 	return bcid;
 }
 
-int Hit::get_col(){
+int Hit::get_col() const{
 	return col;
 }
 
-int Hit::get_row(){
+int Hit::get_row() const{
 	return row;
 }
 
-int Hit::get_tot(){
+int Hit::get_tot() const{
 	return tot;
 }
 

@@ -28,13 +28,15 @@ class Hit{
 		~Hit(){};
 
 		//Methods
-		
+		bool compare_rows(const Hit& lhs, const Hit& rhs);
+		bool compare_cols(const Hit& lhs, const Hit& rhs);
+
 		//Getters
 		//TODO vector<Hit> getHits();
-		int get_bcid();
-		int get_col();
-		int get_row();
-		int get_tot();
+		int get_bcid() const;
+		int get_col() const;
+		int get_row() const;
+		int get_tot() const;
 
 		//******* Setters ********
 		//TODO void setData(std::vector<double> newT, std::vector<double> newY);
