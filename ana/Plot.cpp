@@ -166,7 +166,7 @@ std::map<unsigned,TH2F*> Plot::eventClusters(ClusterContainer* myClusters){
 	std::map<unsigned,TH2F*> plots;
 	std::map<unsigned,unsigned> weight;
 	ClusterContainer::iterator i;
-	std::list<Hit>::iterator j;
+	Hits::iterator j;
 	std::stringstream ss;
 
 	unsigned lv1id(-1), current_lv1id(-1), counter(1);
@@ -223,7 +223,7 @@ std::map<unsigned,TH2F*> Plot::eventToT(ClusterContainer* myClusters){
 
 	std::map<unsigned,TH2F*> plots;
 	ClusterContainer::iterator i;
-	std::list<Hit>::iterator j;
+	Hits::iterator j;
 	std::stringstream ss;
 
 	unsigned lv1id(-1), current_lv1id(-1), counter(1);
