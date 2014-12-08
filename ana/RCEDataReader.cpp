@@ -130,8 +130,9 @@ void RCEDataReader::m_importData(EventMap* events ){
 	infile.close();
 }
 
-
-
+ void m_importMask(MaskMap* masks){
+ //todo
+ };
 
 
 

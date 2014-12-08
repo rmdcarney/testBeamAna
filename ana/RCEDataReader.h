@@ -21,8 +21,8 @@ class RCEDataReader : public DataReader {
 		~RCEDataReader();
 
 		//Inherited methods
-		void m_importData(EventMap*);
-		void m_importMask(MaskMap*);
+		void m_importData(EventMap* events);
+		void m_importMask(MaskMap* masks);
 };
 
 #endif
