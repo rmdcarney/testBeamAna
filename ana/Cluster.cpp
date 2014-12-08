@@ -10,17 +10,30 @@
 
 #include <Cluster.h>
 #define DEBUG 0
+#define nCols 80
+#define nRows 336
+#define minCol 0
+#define minRow 0
 
 Cluster::Cluster() {
+	//Attributes
+	lv1id=0;
+	//TODO
+	nDeltaRays=0;
+
+	//Flags
+	totOverflow = false;
+	atEdge = false;
+	checkIsAtEdge = false;
+
+	//Calculated
 	size=0;
 	width=0;
 	length=0;
 	tot=0;
-	nDeltaRays=0;
-	lv1id=0;
-	totOverflow = false;
 	centreOfCharge.first = -1;
 	centreOfCharge.second = -1;
+	
 	//Hit container - ready!
 	Hits hits;
 }
@@ -36,6 +49,7 @@ void Cluster::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 
 //******* finders - calculate properties of the cluster ********
 
+//Compare functions for sortin hit list
 bool compare_cols(const Hit& lhs, const Hit& rhs){
 	
 	if(lhs.get_col() > rhs.get_col())
@@ -54,7 +68,7 @@ bool compare_rows(const Hit& lhs, const Hit& rhs){
 	}
 }
 
-
+//Find the width of cluster in units of pixels in a column
 void Cluster::find_width(){
 
 	//Sort by col
@@ -64,6 +78,7 @@ void Cluster::find_width(){
 	set_width(hits.back().get_col() - hits.front().get_col() + 1);
 }
 
+//Find length of a cluster in units of pixels in a row
 void Cluster::find_length(){
 
 	//Sort by row
@@ -73,9 +88,10 @@ void Cluster::find_length(){
 	set_length(hits.back().get_row() - hits.front().get_row() + 1);
 }
 
+//Tot of whole cluster: sum
 void Cluster::findToT(){
 	
-	std::list<Hit>::iterator i;
+	Hits::iterator i;
 	tot = 0;
 	if(!hits.empty() && hits.size()>1){
 		for(i=hits.begin(); i!=hits.end(); ++i){
@@ -90,10 +106,11 @@ void Cluster::findToT(){
 	}
 }
 
+//Mean tot in cluster position
 void Cluster::findCentreOfCharge(){
 
 	//Find mean position relative to cluster length
-	std::list<Hit>::iterator i;
+	Hits::iterator i;
 	centreOfCharge.first = -1;
 	centreOfCharge.second = -1;
 	unsigned sumx(0),sumy(0), toti(0);
@@ -155,14 +172,48 @@ void Cluster::findCentreOfCharge(){
 	centreOfCharge.second = (pcy*100.);
 }
 
+//Checks to see if the cluster is at the edge of the chip
+bool Cluster::isAtEdge(){
 
-//Getters
+	Hits::iterator it;
+	//Check that the cluster has hits and 
+	//that the is at edge has been checked already
+	if(hits.size() == 0)
+		std::cout<<"ERROR - tried to check if empty cluster is at edge! Fill cluster before checking. "
+			<<std::endl;
 
-std::list<Hit>::iterator Cluster::get_firstHit(){
+	//Have we calculated this already? If yes, return the result 
+	if(checkIsAtEdge == false){
+	
+		for(it = hits.begin(); it != hits.end(); ++it){
+			
+			//If any of the hits are on the first/last col/row, flag the
+			//cluste as being atEdge. 
+			if(it->get_col() == nCols || it->get_col() == minCol){
+				atEdge = true;
+				checkIsAtEdge = true;
+				return atEdge;
+			} else if (it->get_row() == nRows || it->get_row() == minRow){
+					atEdge = true;
+					checkIsAtEdge = true;
+					return atEdge;
+			}
+		}
+		//You've checked.
+		checkIsAtEdge = true;
+	}	
+	return atEdge;
+}
+				
+
+
+//************* Getters ***************
+
+Hits::iterator Cluster::get_firstHit(){
 	return hits.begin();
 }
 
-std::list<Hit>::iterator Cluster::get_endOfHits(){
+Hits::iterator Cluster::get_endOfHits(){
 	return hits.end();
 }
 

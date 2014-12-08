@@ -15,8 +15,6 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include <vector>
-#include <list>
 #include <sstream>
 
 #include "Hit.h"
@@ -32,10 +30,11 @@ class Cluster{
 		//Methods
 		void addHit(Hit arg_hits);
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
+		bool isAtEdge();
 
 		//Getters
-		std::list<Hit>::iterator get_firstHit();
-		std::list<Hit>::iterator get_endOfHits();
+		Hits::iterator get_firstHit();
+		Hits::iterator get_endOfHits();
 		std::pair<double, double> get_centreOfCharge();
 		unsigned get_size();
 		unsigned get_totalToT();
@@ -57,7 +56,9 @@ class Cluster{
 		unsigned nDeltaRays;
 		unsigned lv1id;
 		bool totOverflow;
-		std::list<Hit> hits;
+		bool atEdge;
+		bool checkIsAtEdge;
+		Hits hits;
 		std::pair<double,double> centreOfCharge;
 
 		//Methods
