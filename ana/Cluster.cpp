@@ -47,6 +47,25 @@ void Cluster::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 	hits.push_back(Hit(bcid, col, row, tot));
 }
 
+void Cluster::merge(Cluster* anotherCluster){
+	
+	//Merge the hits
+	Hits::iterator i = hits.end();
+	Hits a;
+	a.push_back(Hit(0,0,0,0));
+	
+	anotherCluster->get_hits()->splice(i,hits);
+	//Reset cluster properties
+	checkIsAtEdge = false;
+	size = 0;
+	width = 0;
+	length = 0;
+	tot = 0;
+	centreOfCharge.first = -1;
+	centreOfCharge.second = -1;
+	nMissingHits = -1;
+
+}
 
 //******* finders - calculate properties of the cluster ********
 
@@ -349,6 +368,10 @@ int Cluster::get_nMissingHits(){
 	if(nMissingHits == -1)
 		find_nMissingHits();
 	return nMissingHits;
+}
+
+Hits* Cluster::get_hits(){
+	return (&hits);
 }
 
 //Setters

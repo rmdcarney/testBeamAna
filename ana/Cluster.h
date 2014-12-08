@@ -31,6 +31,7 @@ class Cluster{
 		void addHit(Hit arg_hits);
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
 		bool isAtEdge();
+		void merge(Cluster* anotherCluster);
 
 
 		//Getters
@@ -71,7 +72,8 @@ class Cluster{
 		void find_centreOfCharge();
 		void find_nMissingHits();
 
-		//Vars
+		//Getters + Setters
+		Hits* get_hits();
 		void set_centreOfCharge(std::pair<unsigned,unsigned> arg_cOfc);
 		void set_ToT(unsigned arg_tot);
 		void set_length(unsigned length);

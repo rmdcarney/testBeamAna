@@ -12,12 +12,9 @@
 #define DATAREADER_H
 
 #include <string>
-#include <iostream>
-#include <fstream>
-
+#include <map>
+#include <vector>
 #include <Event.h>
-
-using namespace std;
 
 class DataReader{
 	public:
@@ -26,8 +23,14 @@ class DataReader{
 		DataReader(std::string arg_filename);
 		~DataReader();
 
+		//Containers
+		typedef std::pair<int,int> MaskedPixel;
+		typedef std::vector<MaskedPixel> Mask;
+		typedef std::map<unsigned, Mask> MaskMap;
+
 		//Methods
-		virtual void m_importData(Event*){};
+		virtual void m_importData(EventMap*)=0;
+		virtual void m_importMask(MaskMap*)=0;
 		void m_write_txt(std::string outputFile);
 		void m_write_hist(std::string outputFile);
 
@@ -41,6 +44,8 @@ class DataReader{
 		//Setters
 
 	protected:
+
+
 		//Member variables
 		std::string filename;
 		unsigned timestamp;

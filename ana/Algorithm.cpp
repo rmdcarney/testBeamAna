@@ -439,3 +439,5 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 		} //Event loop
 	} //link loop
 }
+
+void maskedPixel_clustering(ClusterMap* clusters, std::vector<std::pair<int, int> > maskedPixels){}
