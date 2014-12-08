@@ -33,7 +33,7 @@ namespace Algorithm{
 	void resetBcidLimits(int bcid, int* bcidHigh, int* bcidLow, bool* bcidSet);
 	void resetRowLimits(int row, int* rowHigh, int* rowLow); 
 	void resetColLimits(int col, int* colHigh, int* colLow); 
-	void checkHitFitsBoundaryConditions(int* colHigh, int* colLow, int* rowHigh, int* rowLow, int* bcidHigh, int* bcidLow, bool* bcidSet, int col, int row, int bcid, int tot, EventContainer::iterator* i, std::list<Hit>::iterator* k, ClusterMap::iterator* cit);
+	void checkHitFitsBoundaryConditions(int* colHigh, int* colLow, int* rowHigh, int* rowLow, int* bcidHigh, int* bcidLow, bool* bcidSet, int col, int row, int bcid, int tot, EventContainer::iterator* i, Hits::iterator* k, ClusterMap::iterator* cit);
 
 }
 

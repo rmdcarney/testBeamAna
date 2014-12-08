@@ -32,17 +32,17 @@ void Event::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 	hits.push_back(Hit(bcid, col, row, tot));
 }
 
-std::list<Hit>::iterator Event::eraseHit(std::list<Hit>::iterator it){
+Hits::iterator Event::eraseHit(Hits::iterator it){
 	return(hits.erase(it));
 }
 
 //Getters
 
-std::list<Hit>::iterator Event::get_firstHit(){
+Hits::iterator Event::get_firstHit(){
 	return hits.begin();
 }
 
-std::list<Hit>::iterator Event::get_endOfHits(){
+Hits::iterator Event::get_endOfHits(){
 	return hits.end();
 }
 

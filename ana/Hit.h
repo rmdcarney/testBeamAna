@@ -15,7 +15,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-#include <vector>
+#include <list>
 #include <sstream>
 
 using namespace std;
@@ -56,7 +56,7 @@ class Hit{
 		
 };
 
-typedef std::vector<Hit> Hits;
+typedef std::list<Hit> Hits;
 #endif
 
 

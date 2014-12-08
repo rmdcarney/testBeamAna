@@ -50,49 +50,6 @@ DataReader::FormattedRecord::FormattedRecord(unsigned& wd){
 	m_record.ui=wd;
 }
 
-//******** Struct definitions ********
-//TODO is there a way around this??
-/*
-struct DataReader::FormattedRecord::Generic{
-	unsigned int unused2: 29;
-	unsigned int headerkey: 1;
-	unsigned int headerRCEkey: 1;
-	unsigned int datakey: 1;
-};
-
-struct DataReader::FormattedRecord::Header{
-	unsigned int bcid: 13;
-	unsigned int lv1id: 12;
-	unsigned int link: 4;
-	unsigned int key: 1;
-	unsigned int unused1: 2;
-};
-
-struct DataReader::FormattedRecord::HeaderRCE{
-	unsigned int rce: 8;
-	unsigned int unusedRCE: 22;
-	unsigned int key: 1;
-	unsigned int unused1: 1;
-};
-
-struct DataReader::FormattedRecord::Data{
-	unsigned int row: 9;
-	unsigned int col: 7;
-	unsigned int tot: 8;
-	unsigned int chipID: 4;
-	unsigned int unused1: 3;
-	unsigned int key: 1;
-};
-
-union DataReader::FormattedRecord::Record{
-	unsigned int ui;
-	Generic generic;
-	Header header;
-	Data data;
-	HeaderRCE headerRCE;
-};
-
-*/
 //********** Methods **********
 
 bool DataReader::FormattedRecord::isHeader(){

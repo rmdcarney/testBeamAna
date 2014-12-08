@@ -151,7 +151,7 @@ void Algorithm::resetColLimits(int col, int* colHigh, int* colLow){
 }
 
 
-void Algorithm::checkHitFitsBoundaryConditions(int* colHigh, int* colLow, int* rowHigh, int* rowLow, int* bcidHigh, int* bcidLow, bool* bcidSet, int col, int row, int bcid, int tot, EventContainer::iterator* i, std::list<Hit>::iterator* k, ClusterMap::iterator* cit){
+void Algorithm::checkHitFitsBoundaryConditions(int* colHigh, int* colLow, int* rowHigh, int* rowLow, int* bcidHigh, int* bcidLow, bool* bcidSet, int col, int row, int bcid, int tot, EventContainer::iterator* i, Hits::iterator* k, ClusterMap::iterator* cit){
 
 	//Check to see if the current hit fits the boundary conditions
 	if(col <= *colHigh && col >= *colLow){
@@ -224,7 +224,7 @@ void Algorithm::findClusters_iterative(ClusterMap* clusters, EventMap events){
 	ClusterMap::iterator cit;
 	EventMap::iterator mit;
 	EventContainer::iterator i;
-	std::list<Hit>::iterator k;
+	Hits::iterator k;
 
 	//Temp vars
 	int colHigh(-1), colLow(-1), 

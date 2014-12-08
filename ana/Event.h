@@ -33,11 +33,11 @@ class Event{
 		//Methods
 		void addHit(Hit arg_hits);
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
-		std::list<Hit>::iterator eraseHit(std::list<Hit>::iterator it);
+		Hits::iterator eraseHit(Hits::iterator it);
 
 		//Getters
-		std::list<Hit>::iterator get_firstHit();
-		std::list<Hit>::iterator get_endOfHits();
+		Hits::iterator get_firstHit();
+		Hits::iterator get_endOfHits();
 		int get_nHits();
 		int get_lv1id();
 		int get_chipID();
@@ -54,7 +54,7 @@ class Event{
 		unsigned lv1id;
 		unsigned chipID;
 		unsigned link;
-		std::list<Hit> hits;
+		Hits hits;
 		
 };
 
