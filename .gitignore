@@ -5,5 +5,7 @@ src/iteratorTest.cxx
 src/sgnTest.cxx
 src/sizeMain.cxx
 src/testnHits.cxx
+src/sortTest.cxx
+src/missingHitsTest.cxx
 rceCode/*
 
