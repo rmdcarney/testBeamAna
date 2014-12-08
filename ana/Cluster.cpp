@@ -33,7 +33,8 @@ Cluster::Cluster() {
 	tot=0;
 	centreOfCharge.first = -1;
 	centreOfCharge.second = -1;
-	
+	nMissingHits = -1;
+
 	//Hit container - ready!
 	Hits hits;
 }
@@ -52,21 +53,36 @@ void Cluster::addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot){
 //Compare functions for sortin hit list
 bool compare_cols(const Hit& lhs, const Hit& rhs){
 	
-	if(lhs.get_col() > rhs.get_col())
-		return false;
-	else{
+	if(lhs.get_col() < rhs.get_col())
 		return true;
+	else{
+		return false;
 	}
 }
 
 bool compare_rows(const Hit& lhs, const Hit& rhs){
 	
-	if(lhs.get_row() > rhs.get_row())
-		return false;
-	else{
+	if(lhs.get_row() < rhs.get_row())
 		return true;
+	else{
+		return false;
 	}
 }
+
+//Only use this as the condition after first running a row sort
+bool compare_colsAfterRows(const Hit& lhs, const Hit& rhs){
+
+	//Only interested in subsorting
+	if(lhs.get_row() == rhs.get_row()){
+		if(lhs.get_col() < rhs.get_col())
+			return true;
+		else{
+			return false;
+		}
+	}
+	return false;
+}
+
 
 //Find the width of cluster in units of pixels in a column
 void Cluster::find_width(){
@@ -89,7 +105,7 @@ void Cluster::find_length(){
 }
 
 //Tot of whole cluster: sum
-void Cluster::findToT(){
+void Cluster::find_ToT(){
 	
 	Hits::iterator i;
 	tot = 0;
@@ -107,7 +123,7 @@ void Cluster::findToT(){
 }
 
 //Mean tot in cluster position
-void Cluster::findCentreOfCharge(){
+void Cluster::find_centreOfCharge(){
 
 	//Find mean position relative to cluster length
 	Hits::iterator i;
@@ -126,7 +142,7 @@ void Cluster::findCentreOfCharge(){
 			return;
 	//Not yet been calculated
 	else if(tot == 0)
-		findToT();
+		find_ToT();
 
 	//If it still can't calculate tot, quit
 	if(tot ==0)
@@ -205,7 +221,75 @@ bool Cluster::isAtEdge(){
 	return atEdge;
 }
 				
+void Cluster::find_nMissingHits(){
+	
+	//TODO delete
+	Hits::iterator it;
+	std::cout<<"\nBefore sort: \n"<<std::endl;
+	for(it = hits.begin(); it != hits.end(); ++it)
+		std::cout<<"col: "<<it->get_col()
+			<<" row: "<<it->get_row()
+			<<std::endl;
 
+	//Sort the hits by row, then column
+	hits.sort(compare_rows);
+	hits.sort(compare_colsAfterRows);
+
+	std::cout<<"\nAfter sort: \n"<<std::endl;
+	for(it = hits.begin(); it != hits.end(); ++it)
+		std::cout<<"col: "<<it->get_col()
+			<<" row: "<<it->get_row()
+			<<std::endl;
+	
+	//First, properly initialise the counter
+	nMissingHits = 0;
+
+	int counter = 0;
+	Hits::iterator i,j;
+	//j is always one iteration ahead of i
+	j = hits.begin();
+	++j;
+
+	//TODO delete
+	std::cout<<"*************************************"<<std::endl;
+	std::cout<<" Starting check for missing hits: "<<std::endl;
+	std::cout<<"*************************************\n"<<std::endl;
+	for(i = hits.begin(); i != hits.end(); ++i, ++j){
+
+		//As long as the current element is not the last
+		if(j != hits.end()){
+			//counter = row_i +1
+			counter = i->get_row() + 1;
+			
+			//TODO delete
+			std::cout<<" row_i: "<<i->get_row()
+				<<" row_i+1: "<<j->get_row()
+				<<" col_i: "<<i->get_col()
+				<<" col_i+1: "<<j->get_col()
+				<<std::endl;
+			//If row_i == row_i+1
+			if( j->get_row() == i->get_row()){
+				//counter = col_i +1
+				counter = i->get_col() + 1;
+				//if col_i+1 != col_i +1i
+				//TODO
+				while( j->get_col() != counter){
+				std::cout<<"counter_col: "<<counter<<std::endl;
+					nMissingHits++;
+					counter++;
+				}
+			
+			//if row_i+1 != row_i + 1	
+			} else {
+				while( j->get_row() != counter){
+				std::cout<<"counter_row: "<<counter<<std::endl;
+				nMissingHits++;
+				counter++;
+				}
+			}
+		}
+	}
+}
 
 //************* Getters ***************
 
@@ -247,7 +331,7 @@ unsigned Cluster::get_length(){
 
 unsigned Cluster::get_totalToT(){
 	if(tot == 0 && totOverflow == false)
-		findToT();
+		find_ToT();
 	return tot;
 }
 
@@ -257,10 +341,15 @@ unsigned Cluster::get_nDeltaRays(){
 
 std::pair<double,double> Cluster::get_centreOfCharge(){
 	if(centreOfCharge.first == -1 && centreOfCharge.second == -1 && totOverflow == false)
-		findCentreOfCharge();
+		find_centreOfCharge();
 	return centreOfCharge;
 }
 
+int Cluster::get_nMissingHits(){
+	if(nMissingHits == -1)
+		find_nMissingHits();
+	return nMissingHits;
+}
 
 //Setters
 

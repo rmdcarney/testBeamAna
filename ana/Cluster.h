@@ -32,6 +32,7 @@ class Cluster{
 		void addHit(unsigned bcid, unsigned col, unsigned row, unsigned tot);
 		bool isAtEdge();
 
+
 		//Getters
 		Hits::iterator get_firstHit();
 		Hits::iterator get_endOfHits();
@@ -42,6 +43,7 @@ class Cluster{
 		unsigned get_nDeltaRays();
 		unsigned get_lv1id();
 		unsigned get_length();
+		int get_nMissingHits();
 
 		//******* Setters ********
 		//TODO void setData(std::vector<double> newT, std::vector<double> newY);
@@ -55,6 +57,7 @@ class Cluster{
 		unsigned length;
 		unsigned nDeltaRays;
 		unsigned lv1id;
+		int nMissingHits;
 		bool totOverflow;
 		bool atEdge;
 		bool checkIsAtEdge;
@@ -64,8 +67,9 @@ class Cluster{
 		//Methods
 		void find_width();
 		void find_length();
-		void findToT();
-		void findCentreOfCharge();
+		void find_ToT();
+		void find_centreOfCharge();
+		void find_nMissingHits();
 
 		//Vars
 		void set_centreOfCharge(std::pair<unsigned,unsigned> arg_cOfc);
